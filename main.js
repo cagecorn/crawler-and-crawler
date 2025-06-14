@@ -9,6 +9,13 @@ const { gameState, startGame, processTurn, movePlayer, useSkill, saveGame, loadG
 // --- UI 요소 가져오기 ---
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 let gameImages = {};
 
 const modalOverlay = document.getElementById('modal-overlay');

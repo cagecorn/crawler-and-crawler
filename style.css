@@ -1,0 +1,119 @@
+:root {
+    --panel-bg: url('assets/images/ui-bg.png');
+    --border-img: url('assets/images/ui-border.png');
+    --border-slice: 25;
+}
+
+body {
+    background-color: #000;
+    color: #eee;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    overflow: hidden; /* 스크롤바 제거 */
+}
+
+#game-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* 게임 화면이 가장 뒤에 위치 */
+}
+
+#game-canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#top-menu-bar {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 8px 15px;
+    border-radius: 12px;
+    border: 1px solid #555;
+    z-index: 100; /* 메뉴가 항상 위에 위치 */
+}
+
+.menu-btn {
+    background-color: #333;
+    color: #eee;
+    border: 1px solid #666;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.menu-btn:hover {
+    background-color: #555;
+}
+
+#modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#modal-overlay.hidden {
+    display: none;
+}
+
+.modal-panel {
+    display: none; /* 평소엔 숨겨져 있음 */
+    position: relative; /* 자식인 닫기 버튼의 위치 기준 */
+    background-image: var(--panel-bg);
+    background-color: #3a2d1d;
+    background-size: cover;
+    color: #111;
+    font-weight: bold;
+    padding: 20px;
+    border: 20px solid transparent;
+    border-image-source: var(--border-img);
+    border-image-slice: var(--border-slice);
+    border-image-repeat: repeat;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-panel.wide {
+    width: 60vw;
+    max-width: 800px;
+}
+
+.modal-panel.active {
+    display: block; /* 활성화되면 보이게 함 */
+}
+
+.close-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 30px;
+    height: 30px;
+    background-color: #c0392b;
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* 기존 패널 내부 스타일은 여기에 그대로 유지하거나 붙여넣습니다. */
+/* 예: .stats h2, .inventory-slot 등... */

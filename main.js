@@ -1,6 +1,6 @@
 // main.js
 
-import { assetLoader, renderGame } from './canvasRenderer.js';
+import { assetLoader, renderGame, updateTileSize } from './canvasRenderer.js';
 import './src/mechanics.js';
 import { updateStats, updateInventoryDisplay, updateMercenaryDisplay, updateSkillDisplay, updateMaterialsDisplay } from './src/ui.js';
 
@@ -11,8 +11,15 @@ const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    updateTileSize(width, height);
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();

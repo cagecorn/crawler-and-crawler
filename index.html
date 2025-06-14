@@ -2,50 +2,67 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>던전 크롤러 - Canvas</title>
+    <title>던전 크롤러</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1><img src="assets/images/title.png" alt="던전 크롤러 로고" class="title-logo"></h1>
-    <div class="top-controls">
-        <button id="toggle-bgm">🔇 배경음</button>
-        <button id="vol-down">🔉-</button>
-        <button id="vol-up">🔊+</button>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
     </div>
-    <div id="turn-effects" class="turn-effects"></div>
 
-    <div class="main-container">
-        <div class="game-area">
-            <div class="dungeon-container">
-                <canvas id="game-canvas" width="650" height="650"></canvas>
-            </div>
-            <div class="message-log" id="message-log"></div>
-            <div class="controls">
-                <div class="controls-row" style="margin-top: 10px;">
-                    <button id="save-game" style="background: linear-gradient(45deg, #2196F3, #1976D2);">💾 게임 저장</button>
-                    <button id="load-game" style="background: linear-gradient(45deg, #FF9800, #F57C00);">📁 게임 불러오기</button>
-                    <button id="new-game" style="background: linear-gradient(45deg, #9E9E9E, #757575);">🔄 새 게임</button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="middle-panel">
-             </div>
-        <div class="side-panel">
-            </div>
+    <div id="top-menu-bar">
+        <button class="menu-btn" data-panel-id="stats-panel">내 정보</button>
+        <button class="menu-btn" data-panel-id="inventory-panel">인벤토리</button>
+        <button class="menu-btn" data-panel-id="mercenary-panel">용병 부대</button>
+        <button class="menu-btn" data-panel-id="skills-panel">스킬</button>
+        <button class="menu-btn" data-panel-id="materials-panel">제작</button>
+        <button class="menu-btn" data-panel-id="game-options-panel">설정</button>
     </div>
-    
-    <div id="shop-panel" class="shop-panel" style="display:none;"></div>
-    <div id="mercenary-detail-panel" class="details-panel" style="display:none;"></div>
-    <div id="monster-detail-panel" class="details-panel" style="display:none;"></div>
+
+    <div id="modal-overlay" class="hidden">
+        
+        <div id="stats-panel" class="modal-panel">
+            <button class="close-btn">X</button>
+            <h2>🛡️ 플레이어 정보</h2>
+            </div>
+
+        <div id="inventory-panel" class="modal-panel wide">
+            <button class="close-btn">X</button>
+            <h2>🎒 인벤토리</h2>
+            </div>
+
+        <div id="mercenary-panel" class="modal-panel wide">
+            <button class="close-btn">X</button>
+            <h2>🤝 용병 부대</h2>
+            </div>
+        
+        <div id="skills-panel" class="modal-panel">
+            <button class="close-btn">X</button>
+            <h2>📚 스킬</h2>
+            </div>
+
+        <div id="materials-panel" class="modal-panel">
+            <button class="close-btn">X</button>
+            <h2>🛠️ 제작</h2>
+            </div>
+
+        <div id="game-options-panel" class="modal-panel">
+            <button class="close-btn">X</button>
+            <h2>⚙️ 게임 설정</h2>
+            <button id="save-game">💾 게임 저장</button>
+            <button id="load-game">📁 게임 불러오기</button>
+            <button id="new-game">🔄 새 게임</button>
+        </div>
+    </div>
+
+    <div id="game-over-panel" style="display:none;"></div>
     <div id="item-detail-panel" class="details-panel" style="display:none;"></div>
-    <div id="item-target-panel" class="details-panel" style="display:none;"></div>
-    <div id="crafting-detail-panel" class="details-panel" style="display:none;"></div>
-    <div id="corpse-panel" class="details-panel" style="display:none;"></div>
-    
-    <audio id="bgm-player" loop></audio>
 
     <script src="dice.js"></script>
-    <script type="module" src="mechanics.js"></script>
-    <script type="module" src="ui.js"></script> <script type="module" src="canvasRenderer.js"></script> <script type="module" src="main.js"></script> </body>
+    <script type="module" src="./src/state.js"></script>
+    <script type="module" src="./src/mechanics.js"></script>
+    <script type="module" src="./src/ui.js"></script>
+    <script type="module" src="./canvasRenderer.js"></script>
+    <script type="module" src="./main.js"></script>
+</body>
 </html>

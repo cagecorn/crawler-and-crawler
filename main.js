@@ -1,7 +1,11 @@
 // main.js
 
 import { assetLoader, renderGame } from './canvasRenderer.js';
-import { updateStats, updateInventoryDisplay, updateMercenaryDisplay, updateSkillDisplay, updateMaterialsDisplay } from './src/ui.js';
+import './src/ui.js';
+
+// `ui.js` attaches its helper functions to the global `window` object. Read them
+// from there instead of using ES module exports.
+const { updateStats, updateInventoryDisplay, updateMercenaryDisplay, updateSkillDisplay, updateMaterialsDisplay } = window;
 
 // mechanics.js does not use ES module exports. It attaches its helpers to the
 // global `window` object, so we read them from there instead of importing.

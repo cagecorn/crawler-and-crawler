@@ -568,7 +568,7 @@ const MERCENARY_NAMES = [
 
         const MAX_FULLNESS = 100;
         const FULLNESS_LOSS_PER_TURN = 0.01;
-        const CORPSE_TURNS = 60; // how long a corpse remains on the map
+        const CORPSE_TURNS = 120; // how long a corpse remains on the map
         const CORRIDOR_WIDTH = 7; // width of dungeon corridors
 
         function carveWideCorridor(map, x1, y1, x2, y2) {
@@ -3263,6 +3263,19 @@ function updateMaterialsDisplay() {
         // 용병 상세 정보 표시
         function showMercenaryDetails(merc) {
             SoundEngine.playSound('openPanel');
+            let contentEl = document.getElementById('mercenary-detail-content');
+            let panelEl = document.getElementById('mercenary-detail-panel');
+            if (!panelEl) {
+                panelEl = document.createElement('div');
+                panelEl.id = 'mercenary-detail-panel';
+                panelEl.style.display = 'none';
+                document.body.appendChild(panelEl);
+            }
+            if (!contentEl) {
+                contentEl = document.createElement('div');
+                contentEl.id = 'mercenary-detail-content';
+                panelEl.appendChild(contentEl);
+            }
             const weapon = merc.equipped && merc.equipped.weapon ? merc.equipped.weapon.name : '없음';
             const armor = merc.equipped && merc.equipped.armor ? merc.equipped.armor.name : '없음';
             const accessory1 = merc.equipped && merc.equipped.accessory1 ? merc.equipped.accessory1.name : '없음';
@@ -3341,15 +3354,17 @@ function updateMaterialsDisplay() {
                 <div>${actionBtn}</div>
             `;
 
-            document.getElementById('mercenary-detail-content').innerHTML = html;
-            document.getElementById('mercenary-detail-panel').style.display = 'block';
+            contentEl.innerHTML = html;
+            panelEl.style.display = 'block';
             gameState.gameRunning = false;
             window.currentDetailMercenary = merc;
         }
 
         function hideMercenaryDetails() {
             SoundEngine.playSound('closePanel');
-            document.getElementById('mercenary-detail-panel').style.display = 'none';
+            const panelEl = document.getElementById('mercenary-detail-panel');
+            if (!panelEl) return;
+            panelEl.style.display = 'none';
             gameState.gameRunning = true;
             window.currentDetailMercenary = null;
         }
@@ -3394,6 +3409,19 @@ function updateMaterialsDisplay() {
 
         function showMonsterDetails(monster) {
             SoundEngine.playSound('openPanel');
+            let contentEl = document.getElementById('monster-detail-content');
+            let panelEl = document.getElementById('monster-detail-panel');
+            if (!panelEl) {
+                panelEl = document.createElement('div');
+                panelEl.id = 'monster-detail-panel';
+                panelEl.style.display = 'none';
+                document.body.appendChild(panelEl);
+            }
+            if (!contentEl) {
+                contentEl = document.createElement('div');
+                contentEl.id = 'monster-detail-content';
+                panelEl.appendChild(contentEl);
+            }
             const auraInfo = monster.isElite && monster.auraSkill
                 ? (SKILL_DEFS[monster.auraSkill] ||
                    MERCENARY_SKILLS[monster.auraSkill] ||
@@ -3467,14 +3495,27 @@ function updateMaterialsDisplay() {
                 ${auraLine}
                 ${actionBtn ? `<div>${actionBtn}</div>` : ''}
             `;
-            document.getElementById('monster-detail-content').innerHTML = html;
-            document.getElementById('monster-detail-panel').style.display = 'block';
+            contentEl.innerHTML = html;
+            panelEl.style.display = 'block';
             gameState.gameRunning = false;
             window.currentDetailMonster = monster;
         }
 
-        function showChampionDetails(champion) {
+       function showChampionDetails(champion) {
             SoundEngine.playSound('openPanel');
+            let contentEl = document.getElementById('monster-detail-content');
+            let panelEl = document.getElementById('monster-detail-panel');
+            if (!panelEl) {
+                panelEl = document.createElement('div');
+                panelEl.id = 'monster-detail-panel';
+                panelEl.style.display = 'none';
+                document.body.appendChild(panelEl);
+            }
+            if (!contentEl) {
+                contentEl = document.createElement('div');
+                contentEl.id = 'monster-detail-content';
+                panelEl.appendChild(contentEl);
+            }
             const eq = champion.equipped || {};
             const weapon = eq.weapon ? eq.weapon.name : '없음';
             const armor = eq.armor ? eq.armor.name : '없음';
@@ -3527,15 +3568,17 @@ function updateMaterialsDisplay() {
                 <div>악세2: ${acc2}</div>
                 ${skillLine}
             `;
-            document.getElementById('monster-detail-content').innerHTML = html;
-            document.getElementById('monster-detail-panel').style.display = 'block';
+            contentEl.innerHTML = html;
+            panelEl.style.display = 'block';
             gameState.gameRunning = false;
             window.currentDetailMonster = champion;
         }
 
         function hideMonsterDetails() {
             SoundEngine.playSound('closePanel');
-            document.getElementById('monster-detail-panel').style.display = 'none';
+            const panelEl = document.getElementById('monster-detail-panel');
+            if (!panelEl) return;
+            panelEl.style.display = 'none';
             gameState.gameRunning = true;
             window.currentDetailMonster = null;
         }
@@ -5536,6 +5579,7 @@ function killMonster(monster, killer = null) {
         // 메시지 로그 추가
         function addMessage(text, type = 'info', detail = null, imageUrl = null) {
             const messageLog = document.getElementById('message-log');
+            if (!messageLog) return;
             const last = messageLog.lastElementChild;
 
             // Prevent consecutive duplicate messages
@@ -8277,8 +8321,19 @@ function processTurn() {
 
         function showItemDetailPanel(item) {
             SoundEngine.playSound('openPanel');
-            const panel = document.getElementById('item-detail-panel');
-            const content = document.getElementById('item-detail-content');
+            let panel = document.getElementById('item-detail-panel');
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.id = 'item-detail-panel';
+                panel.style.display = 'none';
+                document.body.appendChild(panel);
+            }
+            let content = document.getElementById('item-detail-content');
+            if (!content) {
+                content = document.createElement('div');
+                content.id = 'item-detail-content';
+                panel.appendChild(content);
+            }
             content.innerHTML = `<h3>${formatItem(item)}</h3>`;
 
             const equipBtn = document.createElement('button');
@@ -8323,7 +8378,9 @@ function processTurn() {
 
         function hideItemDetailPanel() {
             SoundEngine.playSound('closePanel');
-            document.getElementById('item-detail-panel').style.display = 'none';
+            const panel = document.getElementById('item-detail-panel');
+            if (!panel) return;
+            panel.style.display = 'none';
             gameState.gameRunning = true;
         }
 
@@ -8404,6 +8461,53 @@ function processTurn() {
             }
         }
 
+        function rebuildDungeonDOM() {
+            let dungeonEl = document.getElementById('dungeon');
+            if (!dungeonEl) {
+                dungeonEl = document.createElement('div');
+                dungeonEl.id = 'dungeon';
+                document.body.appendChild(dungeonEl);
+            }
+            dungeonEl.innerHTML = '';
+            gameState.cellElements = [];
+            const size = gameState.dungeonSize;
+            dungeonEl.style.setProperty('--dungeon-size', size);
+            dungeonEl.style.gridTemplateColumns = `repeat(${size}, ${CELL_WIDTH}px)`;
+            dungeonEl.style.gridTemplateRows = `repeat(${size}, ${CELL_WIDTH}px)`;
+            for (let y = 0; y < size; y++) {
+                const row = [];
+                for (let x = 0; x < size; x++) {
+                    const cellDiv = document.createElement('div');
+                    cellDiv.dataset.x = x;
+                    cellDiv.dataset.y = y;
+                    cellDiv.className = 'cell';
+                    dungeonEl.appendChild(cellDiv);
+                    row.push(cellDiv);
+                }
+                gameState.cellElements.push(row);
+            }
+        }
+
+        function renderDungeon() {
+            const size = gameState.dungeonSize;
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    const cell = gameState.cellElements[y] && gameState.cellElements[y][x];
+                    if (!cell) continue;
+                    const tile = gameState.dungeon[y][x];
+                    cell.className = 'cell';
+                    cell.textContent = '';
+                    if (tile === 'corpse') {
+                        const corpse = gameState.corpses.find(c => c.x === x && c.y === y);
+                        if (corpse) {
+                            cell.classList.add('corpse');
+                            cell.textContent = corpse.icon || '';
+                        }
+                    }
+                }
+            }
+        }
+
 
         function startGame() {
             // SoundEngine.initialize(); // 오디오 초기화는 사용자 입력 후 수행
@@ -8480,7 +8584,7 @@ removeEggFromIncubator, reviveMercenary, reviveMonsterCorpse,
  rollDice, saveGame, sellItem, confirmAndSell, enhanceItem, disassembleItem, setMercenaryLevel, setMonsterLevel, setChampionLevel,
 showChampionDetails, showItemDetailPanel, showItemTargetPanel, showMercenaryDetails,
 showMonsterDetails, showShop, showSkillDamage, showAuraDetails, skill1Action, skill2Action,
-spawnMercenaryNearPlayer, spawnStartingMaps, startGame, swapActiveAndStandby, tryApplyStatus,
+spawnMercenaryNearPlayer, spawnStartingMaps, rebuildDungeonDOM, renderDungeon, startGame, swapActiveAndStandby, tryApplyStatus,
 unequipAccessory, unequipWeapon, unequipArmor, unequipItemFromMercenary, updateActionButtons,
 updateFogOfWar, updateIncubatorDisplay,
  updateInventoryDisplay, updateMaterialsDisplay, updateMercenaryDisplay,

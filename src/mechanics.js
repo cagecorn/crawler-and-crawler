@@ -3750,6 +3750,16 @@ function updateMaterialsDisplay() {
             return `<div>오라: ${auraText}</div><div>상태: ${statusText}</div>`;
         }
 
+        // Removed DOM-based effect icon updates. This stub is kept for backward
+        // compatibility with tests that expect the function to exist.
+        function updateUnitEffectIcons(unit, container) {
+            if (!container) return;
+            const buff = container.querySelector('.buff-container');
+            if (buff) buff.remove();
+            const status = container.querySelector('.status-container');
+            if (status) status.remove();
+        }
+
         // 안개 업데이트
         function updateFogOfWar() {
             for (let y = 0; y < gameState.dungeonSize; y++) {
@@ -7384,6 +7394,28 @@ function processTurn() {
                 return;
             }
 
+            // heal self when idle if wounded
+            if (mercenary.role === 'support' && mercenary.health < getStat(mercenary, 'maxHealth')) {
+                const knowsHeal = mercenary.skill === 'Heal';
+                const skillInfo = MERCENARY_SKILLS[mercenary.skill];
+                const skillLevel = mercenary.skillLevels && mercenary.skillLevels[mercenary.skill] || 1;
+                const skillManaCost = skillInfo ? getSkillManaCost(mercenary, { manaCost: (skillInfo.manaCost || 0) + skillLevel - 1 }) : 0;
+                const healMana = knowsHeal ? skillManaCost : HEAL_MANA_COST;
+                const healOnCd = knowsHeal && mercenary.skillCooldowns[mercenary.skill] > 0;
+                const healLvl = knowsHeal ? skillLevel : 1;
+                if (!healOnCd && mercenary.mana >= healMana) {
+                    const healed = knowsHeal ? healTarget(mercenary, mercenary, skillInfo, healLvl)
+                                             : healTarget(mercenary, mercenary);
+                    if (healed) {
+                        mercenary.mana -= healMana;
+                        if (knowsHeal) mercenary.skillCooldowns[mercenary.skill] = getSkillCooldown(mercenary, skillInfo);
+                        updateMercenaryDisplay();
+                        mercenary.hasActed = true;
+                        return;
+                    }
+                }
+            }
+
             const playerDistance = getDistance(mercenary.x, mercenary.y, gameState.player.x, gameState.player.y);
 
             // [최적화] 주변에 적이 있을 때만 전투 AI를 실행합니다.
@@ -8187,7 +8219,7 @@ function processTurn() {
 
             const panel = document.getElementById('item-target-panel');
             const content = document.getElementById('item-target-content');
-            content.innerHTML = `<h3>${item.name} 대상 선택</h3>`;
+            if (content) content.innerHTML = `<h3>${item.name} 대상 선택</h3>`;
             const choices = [];
 
             function getEquipInfo(target) {
@@ -8215,11 +8247,13 @@ function processTurn() {
                     fullLabel = `${label} (${info})`;
                 }
                 choices.push({ label: fullLabel, action });
-                const btn = document.createElement('button');
-                btn.innerHTML = fullLabel;
-                btn.className = 'target-button';
-                btn.onclick = () => { action(); hideItemTargetPanel(); };
-                content.appendChild(btn);
+                if (content) {
+                    const btn = document.createElement('button');
+                    btn.innerHTML = fullLabel;
+                    btn.className = 'target-button';
+                    btn.onclick = () => { action(); hideItemTargetPanel(); };
+                    content.appendChild(btn);
+                }
             };
 
             if (item.type === ITEM_TYPES.REVIVE) {
@@ -8247,7 +8281,7 @@ function processTurn() {
                     addBtn(m.name, m, () => equipItemToMercenary(item, m));
                 });
             }
-            const buttons = content.querySelectorAll('.target-button');
+            const buttons = content ? content.querySelectorAll('.target-button') : [];
             if (buttons.length === 1) {
                 buttons[0].click();
                 return;
@@ -8260,14 +8294,15 @@ function processTurn() {
                 const idx = parseInt(res, 10);
                 if (!isNaN(idx) && choices[idx]) choices[idx].action();
             } else {
-                panel.style.display = 'block';
+                if (panel) panel.style.display = 'block';
                 gameState.gameRunning = false;
             }
         }
 
         function hideItemTargetPanel() {
             SoundEngine.playSound('closePanel');
-            document.getElementById('item-target-panel').style.display = 'none';
+            const panel = document.getElementById('item-target-panel');
+            if (panel) panel.style.display = 'none';
             gameState.gameRunning = true;
         }
 
@@ -8589,7 +8624,7 @@ unequipAccessory, unequipWeapon, unequipArmor, unequipItemFromMercenary, updateA
 updateFogOfWar, updateIncubatorDisplay,
  updateInventoryDisplay, updateMaterialsDisplay, updateMercenaryDisplay,
  updateShopDisplay, updateSkillDisplay, updateStats, updateTurnEffects,
- updateTileTabDisplay,
+ updateUnitEffectIcons, updateTileTabDisplay,
 upgradeMercenarySkill, upgradeMonsterSkill, useItem, useItemOnTarget, useSkill, removeMercenary, killMercenary,
     dismiss, sacrifice, allocateStat, exitMap,
     addRecipeToTab, removeRecipeFromTab,

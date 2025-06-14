@@ -54,6 +54,8 @@
             <div>⭐ 경험치: <span id="exp">0</span>/<span id="expNeeded">20</span></div>
             <div><img src="assets/images/gold.png" class="inline-icon"> 골드: <span id="gold">0</span></div>
             <div>🏰 층: <span id="floor">1</span></div>
+            <div id="equipped-tile-side">타일: 없음</div>
+            <div id="turn-effects"></div>
         </div>
 
         <div id="inventory-panel" class="modal-panel wide">
@@ -65,6 +67,7 @@
                 <div class="equipped-slot" id="equipped-armor">방어구: 없음</div>
                 <div class="equipped-slot" id="equipped-accessory1">악세서리1: 없음</div>
                 <div class="equipped-slot" id="equipped-accessory2">악세서리2: 없음</div>
+                <div class="equipped-slot" id="equipped-tile">타일: 없음</div>
             </div>
             <h3>📦 보유 아이템</h3>
             <div id="inventory-filters" style="margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 5px;">
@@ -115,6 +118,7 @@
             <div id="recipe-list"></div>
             <h3>제작 중</h3>
             <div id="crafting-queue"></div>
+            <div id="tile-tab"></div>
         </div>
 
         <div id="game-options-panel" class="modal-panel">

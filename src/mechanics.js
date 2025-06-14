@@ -4528,13 +4528,13 @@ function killMonster(monster, killer = null) {
 
 
 
-        function updateActionButtons() {
-            const atk = document.getElementById('attack');
-            const rng = document.getElementById('ranged');
-            const heal = document.getElementById('heal');
-            atk.style.display = 'inline-block';
-            rng.style.display = 'inline-block';
-            heal.style.display = 'inline-block';
+       function updateActionButtons() {
+           const atk = document.getElementById('attack');
+           const rng = document.getElementById('ranged');
+           const heal = document.getElementById('heal');
+            if (atk) atk.style.display = 'inline-block';
+            if (rng) rng.style.display = 'inline-block';
+            if (heal) heal.style.display = 'inline-block';
         }
 
         // 플레이어 레벨업 체크

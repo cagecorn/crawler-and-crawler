@@ -115,5 +115,10 @@ body {
     line-height: 1;
 }
 
-/* 기존 패널 내부 스타일은 여기에 그대로 유지하거나 붙여넣습니다. */
-/* 예: .stats h2, .inventory-slot 등... */
+.inline-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    vertical-align: middle;
+}
+

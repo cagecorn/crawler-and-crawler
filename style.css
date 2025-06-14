@@ -4,48 +4,36 @@
     --border-slice: 25;
 }
 
+/* === 1. 기본 레이아웃 설정 === */
 body {
-    background-color: #000;
-    color: #eee;
-    font-family: 'Arial', sans-serif;
     margin: 0;
-    overflow: hidden; /* 스크롤바 제거 */
+    padding: 0;
+    overflow: hidden; /* 화면 스크롤바를 완전히 제거합니다. */
+    background-color: #000;
 }
 
 #game-container {
-    position: fixed;
+    position: fixed; /* 화면에 위치를 고정합니다. */
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1; /* 게임 화면이 가장 뒤에 위치 */
-    display: flex; /* 캔버스를 가운데 정렬 */
-    justify-content: center;
-    align-items: center;
+    width: 100vw; /* 보이는 화면의 너비 100% */
+    height: 100vh; /* 보이는 화면의 높이 100% */
+    z-index: 1; /* 다른 UI 요소들보다 뒤에 있도록 설정 */
 }
 
 #game-canvas {
-    image-rendering: pixelated;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    display: block; /* 여백 제거 */
 }
 
+/* === 2. 상단 메뉴 및 모달창 Z-index 설정 === */
 #top-menu-bar {
     position: fixed;
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 8px 15px;
-    border-radius: 12px;
-    border: 1px solid #555;
-    z-index: 100; /* 메뉴가 항상 위에 위치 */
+    z-index: 100; /* 게임 화면(z-index: 1)보다 위에 오도록 설정 */
+    /* ... 기타 스타일 ... */
 }
 
 .menu-btn {
@@ -69,7 +57,7 @@ body {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    z-index: 200;
+    z-index: 200; /* 메뉴 바보다도 위에 오도록 설정 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -129,31 +117,3 @@ body {
     vertical-align: middle;
 }
 
-/* ================================== */
-/* Canvas 전체 화면 및 레이아웃 수정 */
-/* ================================== */
-
-#game-container {
-    position: fixed; /* 화면에 위치를 고정시킵니다. */
-    top: 0;
-    left: 0;
-    width: 100vw; /* 뷰포트(보이는 화면)의 너비 100% */
-    height: 100vh; /* 뷰포트의 높이 100% */
-    z-index: 1; /* 다른 UI 요소들(메뉴, 팝업창)보다 뒤에 있도록 설정 */
-}
-
-#game-canvas {
-    width: 100%;
-    height: 100%;
-    /* 컨테이너 크기에 맞게 캔버스 비율을 유지하며 꽉 채웁니다. */
-    object-fit: cover;
-}
-
-/* 상단 메뉴와 모달창이 게임 화면 위에 오도록 z-index를 높게 설정 */
-#top-menu-bar {
-    z-index: 100;
-}
-
-#modal-overlay {
-    z-index: 200;
-}

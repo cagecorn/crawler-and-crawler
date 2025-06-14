@@ -3585,7 +3585,6 @@ function updateMaterialsDisplay() {
             addMessage(`🔄 ${standby.name}과 ${active.name}을 교체했습니다.`, 'mercenary');
             updateMercenaryDisplay();
             updateIncubatorDisplay();
-            renderDungeon();
         }
 
         // 플레이어 능력치 표시 업데이트
@@ -3761,102 +3760,6 @@ function updateMaterialsDisplay() {
          * @param {object} unit - 아이콘을 표시할 유닛 객체
          * @param {HTMLElement} cellDiv - 해당 유닛이 위치한 셀의 div 요소
          */
-        function updateUnitEffectIcons(unit, cellDiv) {
-            let buffContainer = cellDiv.querySelector('.buff-container');
-            let statusContainer = cellDiv.querySelector('.status-container');
-
-            if (!buffContainer) {
-                buffContainer = document.createElement('div');
-                buffContainer.className = 'buff-container';
-                cellDiv.appendChild(buffContainer);
-            }
-            if (!statusContainer) {
-                statusContainer = document.createElement('div');
-                statusContainer.className = 'status-container';
-                cellDiv.appendChild(statusContainer);
-            }
-
-            buffContainer.innerHTML = '';
-            statusContainer.innerHTML = '';
-
-            if (!unit || !unit.id) return;
-
-            // 1. Collect buff and debuff icons separately
-            const allBuffIcons = [];
-            const allDebuffIcons = [];
-
-            // Auras are buffs
-            allBuffIcons.push(...getActiveAuraIcons(unit));
-
-            // Status ailments are debuffs
-            const STATUS_KEYS = ['poison', 'burn', 'freeze', 'bleed', 'paralysis', 'nightmare', 'silence', 'petrify', 'debuff'];
-            STATUS_KEYS.forEach(status => {
-                if (unit[status] && unit[status + 'Turns'] > 0) {
-                    allDebuffIcons.push(STATUS_ICONS[status]);
-                }
-            });
-
-            // Buffs array uses ⬆️ for buffs and ⬇️ for debuffs
-            if (Array.isArray(unit.buffs)) {
-                unit.buffs.forEach(buff => {
-                    const skillDef = Object.values(SKILL_DEFS).find(def => def.name === buff.name);
-                    if (skillDef && skillDef.icon) {
-                        if (skillDef.icon === '⬆️') {
-                            allBuffIcons.push(skillDef.icon);
-                        } else if (skillDef.icon === '⬇️') {
-                            allDebuffIcons.push(skillDef.icon);
-                        }
-                    }
-                });
-            }
-
-            const uniqueBuffs = [...new Set(allBuffIcons)];
-            const uniqueDebuffs = [...new Set(allDebuffIcons)];
-
-            // 2. Update effectCycleState
-            if (uniqueBuffs.length === 0 && uniqueDebuffs.length === 0) {
-                delete effectCycleState[unit.id];
-            } else {
-                const currentState = effectCycleState[unit.id] || {};
-
-                const buffsChanged = !currentState.buffs || JSON.stringify(currentState.buffs) !== JSON.stringify(uniqueBuffs);
-                const debuffsChanged = !currentState.debuffs || JSON.stringify(currentState.debuffs) !== JSON.stringify(uniqueDebuffs);
-
-                if (!effectCycleState[unit.id]) {
-                    effectCycleState[unit.id] = { buffs: [], debuffs: [], buffIndex: 0, debuffIndex: 0 };
-                }
-
-                if (buffsChanged) {
-                    effectCycleState[unit.id].buffs = uniqueBuffs;
-                    effectCycleState[unit.id].buffIndex = 0;
-                }
-                if (debuffsChanged) {
-                    effectCycleState[unit.id].debuffs = uniqueDebuffs;
-                    effectCycleState[unit.id].debuffIndex = 0;
-                }
-            }
-
-            // 3. Render current icons
-            const state = effectCycleState[unit.id];
-            if (state) {
-                // Buff icon (top)
-                if (state.buffs && state.buffs.length > 0) {
-                    const currentBuffIcon = state.buffs[state.buffIndex];
-                    const iconSpan = document.createElement('span');
-                    iconSpan.className = 'effect-icon';
-                    iconSpan.textContent = currentBuffIcon;
-                    buffContainer.appendChild(iconSpan);
-                }
-                // Debuff icon (bottom)
-                if (state.debuffs && state.debuffs.length > 0) {
-                    const currentDebuffIcon = state.debuffs[state.debuffIndex];
-                    const iconSpan = document.createElement('span');
-                    iconSpan.className = 'effect-icon';
-                    iconSpan.textContent = currentDebuffIcon;
-                    statusContainer.appendChild(iconSpan);
-                }
-            }
-        }
 
         // 몬스터 생성
         function createMonster(type, x, y, level = 1) {
@@ -4348,7 +4251,6 @@ function killMonster(monster, killer = null) {
             gameState.dungeon[corpse.y][corpse.x] = hasItem ? 'item' : 'empty';
             updateStats();
             updateMercenaryDisplay();
-            renderDungeon();
         }
 
         function dissectCorpse(corpse) {
@@ -4366,7 +4268,6 @@ function killMonster(monster, killer = null) {
             const hasItem = gameState.items.some(i => i.x === corpse.x && i.y === corpse.y);
             gameState.dungeon[corpse.y][corpse.x] = hasItem ? 'item' : 'empty';
             addMessage(`🔪 ${corpse.name}의 시체를 해체하여 ${gained.join(', ')}을(를) 얻었습니다.`, 'item');
-            renderDungeon();
         }
 
         function ignoreCorpse(corpse) {
@@ -4523,7 +4424,6 @@ function killMonster(monster, killer = null) {
             if (idx !== -1) gameState.hatchedSuperiors.splice(idx, 1);
             updateMercenaryDisplay();
             updateIncubatorDisplay();
-            renderDungeon();
         }
 
         function getAllMonsterTypes() {
@@ -4600,169 +4500,6 @@ function killMonster(monster, killer = null) {
             return died;
         }
 
-        // 던전 렌더링
-        function renderDungeon() {
-            const dungeonEl = document.getElementById('dungeon');
-            if (!dungeonEl || !gameState.cellElements.length) return;
-            for (let y = 0; y < gameState.dungeonSize; y++) {
-                for (let x = 0; x < gameState.dungeonSize; x++) {
-                    const div = gameState.cellElements[y][x];
-                    const tileBg = div.querySelector('.equipped-tile-bg');
-                    if (tileBg) tileBg.style.removeProperty('background-image');
-                    div.style.removeProperty('background-image');
-                    div.classList.remove('low-health');
-                    // 렌더링마다 이전 아이콘들을 모두 지워 잔상이 남지 않게 합니다.
-                    const buffEl = div.querySelector('.buff-container');
-                    const statusEl = div.querySelector('.status-container');
-                    if (buffEl) buffEl.innerHTML = '';
-                    if (statusEl) statusEl.innerHTML = '';
-                    const baseCellType = gameState.dungeon[y][x];
-                    const finalClasses = ['cell', baseCellType];
-                    let mapTile = null;
-                    if (baseCellType === 'tile') {
-                        mapTile = gameState.mapTiles.find(t => t.x === x && t.y === y);
-                    }
-                    div.textContent = '';
-
-                    if (x === gameState.player.x && y === gameState.player.y) {
-                        finalClasses.push('player');
-                        const bgImages = [];
-                        if (mapTile) bgImages.push(`url('${String(mapTile.imageUrl)}')`);
-                        if (gameState.player.equipped.tile) {
-                            bgImages.push(`url('${String(gameState.player.equipped.tile.imageUrl)}')`);
-                        }
-                        if (tileBg && bgImages.length) tileBg.style.backgroundImage = bgImages.join(', ');
-                        const maxHealth = getStat(gameState.player, 'maxHealth');
-                        if (maxHealth > 0 && gameState.player.health / maxHealth < 0.25) {
-                            finalClasses.push('low-health');
-                        }
-                        updateUnitEffectIcons(gameState.player, div);
-                    } else {
-                            const merc = gameState.activeMercenaries.find(m => m.x === x && m.y === y && m.alive);
-                            if (merc) {
-                                finalClasses.push('mercenary');
-                                if (merc.isMonster && merc.monsterType) {
-                                    // 아군이 된 몬스터의 경우 monsterType을 이용해 몬스터 이미지 클래스를 적용
-                                    finalClasses.push('monster', merc.monsterType.replace('_', '-').toLowerCase());
-                                } else if (merc.type) {
-                                    // 일반 용병일 경우 기존 로직대로 type을 사용
-                                    finalClasses.push(merc.type.toLowerCase());
-                                }
-                                if (merc.isSuperior) finalClasses.push('superior');
-                                else if (merc.isChampion) finalClasses.push('champion');
-                                else if (merc.isElite) finalClasses.push('elite');
-                                const mercBgImages = [];
-                                if (mapTile) mercBgImages.push(`url('${String(mapTile.imageUrl)}')`);
-                                if (merc.equipped.tile) {
-                                    mercBgImages.push(`url('${String(merc.equipped.tile.imageUrl)}')`);
-                                }
-                                if (tileBg && mercBgImages.length) tileBg.style.backgroundImage = mercBgImages.join(', ');
-                                const maxHealth = getStat(merc, 'maxHealth');
-                                if (maxHealth > 0 && merc.health / maxHealth < 0.25) {
-                                    finalClasses.push('low-health');
-                                }
-                                div.textContent = '';
-                                updateUnitEffectIcons(merc, div);
-                            } else {
-                                const proj = gameState.projectiles.find(p => p.x === x && p.y === y);
-                                if (proj) {
-                                    finalClasses.push('projectile');
-                                    div.textContent = proj.icon;
-                                } else if (baseCellType === 'monster') {
-                                const m = gameState.monsters.find(mon => mon.x === x && mon.y === y);
-                                if (m) {
-                                    if (m.isChampion) {
-                                        // 1. 'monster' 클래스를 'empty'로 교체
-                                        const monsterClassIndex = finalClasses.indexOf('monster');
-                                        if (monsterClassIndex > -1) {
-                                            finalClasses[monsterClassIndex] = 'empty';
-                                        }
-                                        // 2. 용병과 직업 클래스 추가
-                                        finalClasses.push('mercenary', m.type.toLowerCase());
-                                    } else {
-                                        const monsterClass = m.type.replace('_', '-').toLowerCase();
-                                        finalClasses.push('monster', monsterClass);
-
-                                        // BUG FIX: 이미지 스프라이트가 있는 몬스터 목록에 4종을 추가하여
-                                        // 불필요한 텍스트 아이콘이 표시되지 않도록 수정합니다.
-                                        const monstersWithSprites = ['slime', 'goblin-archer', 'goblin', 'zombie', 'kobold', 'skeleton', 'goblin-wizard'];
-                                        if (!monstersWithSprites.includes(monsterClass)) {
-                                             div.textContent = m.icon;
-                                        }
-                                    }
-                                    const maxHealth = getStat(m, 'maxHealth');
-                                    if (maxHealth > 0 && m.health / maxHealth < 0.25) {
-                                        finalClasses.push('low-health');
-                                    }
-                                    if (m.isSuperior) finalClasses.push('superior');
-                                    else if (m.isChampion) finalClasses.push('champion');
-                                    else if (m.isElite) finalClasses.push('elite');
-                                    if (tileBg && mapTile) {
-                                        tileBg.style.backgroundImage = `url('${String(mapTile.imageUrl)}')`;
-                                    }
-                                    updateUnitEffectIcons(m, div);
-                                }
-                            } else if (baseCellType === 'item') {
-                                const item = gameState.items.find(it => it.x === x && it.y === y);
-                                if (item) {
-                                    if (item.imageUrl) {
-                                        div.style.backgroundImage = `url('${String(item.imageUrl)}'), url('assets/images/floor-tile.png')`;
-                                        div.style.backgroundSize = 'contain, cover';
-                                        div.style.backgroundPosition = 'center, center';
-                                        div.style.backgroundRepeat = 'no-repeat, no-repeat';
-                                        div.textContent = '';
-                                    } else {
-                                        div.textContent = item.icon;
-                                    }
-                                }
-                            } else if (baseCellType === 'tile') {
-                                if (tileBg && mapTile) {
-                                    tileBg.style.backgroundImage = `url('${String(mapTile.imageUrl)}')`;
-                                }
-                            } else if (baseCellType === 'plant') {
-                                div.textContent = '🌿';
-                            } else if (baseCellType === 'chest') {
-                                div.textContent = '🎁';
-                            } else if (baseCellType === 'mine') {
-                                div.textContent = '⛏️';
-                            } else if (baseCellType === 'tree') {
-                                div.textContent = '🌳';
-                            } else if (baseCellType === 'paladin') {
-                                div.style.backgroundImage = `url('assets/images/paladin.png'), url('assets/images/floor-tile.png')`;
-                                div.style.backgroundSize = 'contain, cover';
-                                div.style.backgroundPosition = 'center, center';
-                                div.style.backgroundRepeat = 'no-repeat, no-repeat';
-                            } else if (baseCellType === 'bones') {
-                                div.textContent = '🦴';
-                            } else if (baseCellType === 'grave') {
-                                div.textContent = '🪦';
-                            } else if (baseCellType.startsWith('temple')) {
-                                div.textContent = '⛩️';
-                            } else if (baseCellType === 'altar') {
-                                div.textContent = '🗺️';
-                            } else if (baseCellType === 'corpse') {
-                                const corpse = gameState.corpses.find(c => c.x === x && c.y === y);
-                                div.textContent = (corpse && corpse.icon) ? corpse.icon : '💀';
-                                finalClasses.push('corpse');
-                            } else if (baseCellType === 'treasure') {
-                                div.textContent = '💰';
-                            } else if (baseCellType === 'exit') {
-                                div.textContent = '🚪';
-                            } else if (baseCellType === 'shop') {
-                                div.textContent = '🏪';
-                            }
-                        }
-                    }
-
-                    div.className = finalClasses.join(' ');
-                    if (gameState.fogOfWar[y] && gameState.fogOfWar[y][x]) {
-                        div.style.filter = 'brightness(0.2)';
-                    } else {
-                        div.style.filter = '';
-                    }
-                }
-            }
-        }
 
         function handleDungeonClick(e) {
             initializeAudio();
@@ -5285,85 +5022,11 @@ function killMonster(monster, killer = null) {
             updateInventoryDisplay();
             updateSkillDisplay();
             updateMercenaryDisplay();
-            renderDungeon();
-            updateCamera();
         }
 
-        // 던전 DOM을 다시 구축하여 셀 요소 배열을 재생성
-        function rebuildDungeonDOM() {
-            const size = gameState.dungeonSize;
-            const dungeonEl = document.getElementById('dungeon');
-            if (!dungeonEl) return;
 
-            dungeonEl.innerHTML = '';
-            gameState.cellElements = [];
 
-            dungeonEl.style.setProperty('--dungeon-size', size);
-            dungeonEl.style.gridTemplateColumns = `repeat(${size}, ${CELL_WIDTH}px)`;
-            dungeonEl.style.gridTemplateRows = `repeat(${size}, ${CELL_WIDTH}px)`;
 
-            for (let y = 0; y < size; y++) {
-                const cellRow = [];
-                for (let x = 0; x < size; x++) {
-                    const cellDiv = document.createElement('div');
-                    cellDiv.dataset.x = x;
-                    cellDiv.dataset.y = y;
-                    const tileBg = document.createElement('div');
-                    tileBg.className = 'equipped-tile-bg';
-                    cellDiv.appendChild(tileBg);
-                    cellDiv.className = 'cell';
-
-                    const buffContainer = document.createElement('div');
-                    buffContainer.className = 'buff-container';
-                    cellDiv.appendChild(buffContainer);
-
-                    const statusContainer = document.createElement('div');
-                    statusContainer.className = 'status-container';
-                    cellDiv.appendChild(statusContainer);
-
-                    dungeonEl.appendChild(cellDiv);
-                    cellRow.push(cellDiv);
-                }
-                gameState.cellElements.push(cellRow);
-            }
-        }
-
-        // 카메라 업데이트 (최적화됨)
-        function updateCamera() {
-            const dungeonElement = document.getElementById('dungeon');
-            const container = document.querySelector('.dungeon-container');
-            if (!dungeonElement || !container) return;
-
-            const cellSize = 33; // 32px + 1px gap
-
-            // 현재 컨테이너 크기에 맞춰 보이는 셀 수 계산
-            const visibleX = Math.floor(container.clientWidth / cellSize);
-            const visibleY = Math.floor(container.clientHeight / cellSize);
-            const viewportSize = Math.min(visibleX, visibleY);
-            gameState.viewportSize = viewportSize;
-
-            // 플레이어를 중심으로 카메라 위치 계산
-            const centerX = Math.floor(viewportSize / 2);
-            const centerY = Math.floor(viewportSize / 2);
-
-            const newCameraX = gameState.player.x - centerX;
-            const newCameraY = gameState.player.y - centerY;
-
-            // 던전 경계 체크
-            const clampedX = Math.max(0, Math.min(newCameraX, gameState.dungeonSize - viewportSize));
-            const clampedY = Math.max(0, Math.min(newCameraY, gameState.dungeonSize - viewportSize));
-
-            // 카메라 위치가 변경된 경우에만 업데이트
-            if (gameState.camera.x !== clampedX || gameState.camera.y !== clampedY) {
-                gameState.camera.x = clampedX;
-                gameState.camera.y = clampedY;
-
-                // 카메라 변환 적용
-                const translateX = -gameState.camera.x * cellSize;
-                const translateY = -gameState.camera.y * cellSize;
-                dungeonElement.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
-            }
-        }
 
         // 용병 고용 함수
         function hireMercenary(type) {
@@ -5419,7 +5082,6 @@ function killMonster(monster, killer = null) {
 
             updateStats();
             updateMercenaryDisplay();
-            renderDungeon();
         }
 
         function generateStars() {
@@ -6358,7 +6020,6 @@ function killMonster(monster, killer = null) {
 
             updateStats();
             updateMercenaryDisplay();
-            renderDungeon();
         }
 
         function removeMercenary(mercenary) {
@@ -6847,7 +6508,6 @@ function killMonster(monster, killer = null) {
                             addMessage(`🎉 ${MERCENARY_TYPES.PALADIN.name}을(를) 고용했습니다!`, 'mercenary');
                             updateStats();
                             updateMercenaryDisplay();
-                            renderDungeon();
                         }
                     }
                 }
@@ -7023,7 +6683,6 @@ function killMonster(monster, killer = null) {
             });
 
             // 변경된 위치 반영
-            renderDungeon();
         }
 
         function exitMap(returnState) {
@@ -7036,7 +6695,6 @@ function killMonster(monster, killer = null) {
             }
             gameState.player.x = x;
             gameState.player.y = y;
-            renderDungeon();
         }
 
         // 턴 처리 (최적화됨)
@@ -7375,11 +7033,7 @@ function processTurn() {
             }
             
             updateFogOfWar();
-            // 렌더링과 카메라 업데이트를 한 번에 처리
-            requestAnimationFrame(() => {
-                updateCamera();
-                renderDungeon();
-            });
+            // 렌더링과 카메라 업데이트는 삭제됨
             const allPlayerUnits = [gameState.player, ...gameState.activeMercenaries.filter(m => m.alive)];
             allPlayerUnits.forEach(unit => {
                 const hpRegen = getStat(unit, 'healthRegen');
@@ -7931,13 +7585,10 @@ function processTurn() {
             gameState.activeMercenaries.forEach(convertMercenary);
             gameState.standbyMercenaries.forEach(convertMercenary);
 
-            rebuildDungeonDOM();
             updateFogOfWar();
             updateStats();
             updateInventoryDisplay();
             updateMercenaryDisplay();
-            renderDungeon();
-            updateCamera();
             updateIncubatorDisplay();
             updateTileTabDisplay();
             updateActionButtons();
@@ -8145,8 +7796,6 @@ function processTurn() {
                 addMessage('🌀 이전 위치로 돌아왔습니다.', 'info');
             }
             p.mana -= manaCost;
-            renderDungeon();
-            updateCamera();
             updateStats();
             gameState.player.skillCooldowns[skillKey] = getSkillCooldown(gameState.player, skill);
             processTurn();
@@ -8419,7 +8068,6 @@ function processTurn() {
                     }
                 }
             });
-            renderDungeon();
             addMessage('📣 용병들을 호출했습니다.', 'mercenary');
             processTurn();
         }
@@ -8449,7 +8097,6 @@ function processTurn() {
                 }
             });
             if (gotItem) playPlayerVoice('assets/audio/player_item.mp3');
-            renderDungeon();
             processTurn();
         }
 
@@ -8790,7 +8437,6 @@ function processTurn() {
                     const pal = createMercenary('PALADIN', palPos.x, palPos.y);
                     gameState.paladinSpawns.push({ x: palPos.x, y: palPos.y, mercenary: pal, cost: 1 });
                     gameState.dungeon[palPos.y][palPos.x] = 'paladin';
-                    renderDungeon();
                 }
             }
             for (let i = 0; i < 5; i++) {
@@ -8811,107 +8457,6 @@ function processTurn() {
 
         // 초기화 및 입력 처리
         startGame();
-        document.getElementById('save-game').onclick = saveGame;
-        document.getElementById('load-game').onclick = loadGame;
-        const newBtn = document.getElementById('new-game');
-        if (newBtn) {
-            newBtn.onclick = () => {
-                if (typeof confirm !== 'function' || confirm('새 게임을 시작하시겠습니까? 진행 중인 내용이 사라집니다.')) {
-                    location.reload();
-                }
-            };
-        }
-        document.getElementById('attack').onclick = meleeAttackAction;
-        document.getElementById('ranged').onclick = rangedAction;
-        document.getElementById('skill1').onclick = skill1Action;
-        document.getElementById('skill2').onclick = skill2Action;
-        document.getElementById('heal').onclick = healAction;
-        document.getElementById('recall').onclick = recallMercenaries;
-        document.getElementById('close-shop').onclick = hideShop;
-        document.getElementById('close-mercenary-detail').onclick = hideMercenaryDetails;
-        document.getElementById('close-monster-detail').onclick = hideMonsterDetails;
-        document.getElementById('close-item-detail').onclick = hideItemDetailPanel;
-        document.getElementById('close-item-target').onclick = hideItemTargetPanel;
-        document.getElementById('dungeon').addEventListener('click', handleDungeonClick);
-        document.getElementById('pickup').onclick = pickUpAction;
-        const matPanel = document.getElementById('materials-panel');
-        matPanel.addEventListener('click', e => {
-            if (e.target === matPanel || e.target.tagName === 'H2') {
-                showCraftingDetailPanel();
-            }
-        });
-        document.getElementById('close-crafting-detail').onclick = hideCraftingDetailPanel;
-        document.getElementById('close-corpse-panel').onclick = hideCorpsePanel;
-
-        // BGM control buttons
-        const nextBtn = document.getElementById('next-bgm');
-        if (nextBtn) nextBtn.onclick = () => { initializeAudio(); BgmPlayer.playNextTrack(); };
-        const prevBtn = document.getElementById('prev-bgm');
-        if (prevBtn) prevBtn.onclick = () => { initializeAudio(); BgmPlayer.playPreviousTrack(); };
-        const toggleBtn = document.getElementById('toggle-bgm');
-        if (toggleBtn) toggleBtn.onclick = () => { initializeAudio(); BgmPlayer.toggleMute(); };
-
-        document.addEventListener('keydown', (e) => {
-            initializeAudio();
-            if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                movePlayer(0, -1);
-            }
-            else if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                movePlayer(0, 1);
-            }
-            else if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                movePlayer(-1, 0);
-            }
-            else if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                movePlayer(1, 0);
-            }
-            else if (e.key.toLowerCase() === 'f' || e.key.toLowerCase() === 'z') {
-                e.preventDefault();
-                meleeAttackAction();
-            }
-            else if (e.key.toLowerCase() === 'x') {
-                e.preventDefault();
-                skill1Action();
-            }
-            else if (e.key.toLowerCase() === 'c') {
-                e.preventDefault();
-                skill2Action();
-            }
-            else if (e.key.toLowerCase() === 'v') {
-                e.preventDefault();
-                rangedAction();
-            }
-            else if (e.key.toLowerCase() === 'a') {
-                e.preventDefault();
-                recallMercenaries();
-            }
-            else if (e.key.toLowerCase() === 'b') {
-                e.preventDefault();
-                pickUpAction();
-            }
-            else if (/^[1-9]$/.test(e.key)) {
-                const idx = parseInt(e.key) - 1;
-                if (gameState.activeMercenaries[idx]) {
-                    e.preventDefault();
-                    showMercenaryDetails(gameState.activeMercenaries[idx]);
-                }
-            }
-        });
-
-        const filterButtons = document.querySelectorAll('.inv-filter-btn');
-        filterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-
-                gameState.inventoryFilter = button.dataset.filter;
-                updateInventoryDisplay();
-            });
-        });
 const exportsObj = {
 gameState, addMessage, addToInventory, advanceIncubators, advanceGameLoop,
 applyStatusEffects, applyAttackBuff, assignSkill, autoMoveStep, averageDice, buildAttackDetail,
@@ -8921,9 +8466,9 @@ createHomingProjectile, createItem, createMercenary, createMonster,
 createRecipeScroll, learnRecipe,
 createSuperiorMonster, createTreasure, createNovaEffect, createScreenShake, playSkillOverlayEffect, playNovaSkillEffect, dissectCorpse, equipItem,
 equipItemToMercenary, estimateSkillDamage, findAdjacentEmpty, findNearestEmpty, findPath,
- formatItem, formatItemName, formatNumber, generateDungeon, rebuildDungeonDOM, generateStars, getAuraBonus,
+ formatItem, formatItemName, formatNumber, generateDungeon, generateStars, getAuraBonus,
 getDistance, getMonsterPoolForFloor, getAllMonsterTypes, getPlayerEmoji, getStat, getStatusResist,
-getActiveAuraIcons, buildEffectDetails, updateUnitEffectIcons,
+getActiveAuraIcons, buildEffectDetails,
 getSkillRange, getSkillCooldown, getSkillManaCost, getSkillPowerMult,
 handleDungeonClick, handleItemClick, handlePlayerDeath,
 hasLineOfSight, healAction, healTarget, hideItemTargetPanel, hideItemDetailPanel,
@@ -8931,12 +8476,12 @@ hideMercenaryDetails, hideMonsterDetails, hideShop, hireMercenary, killMonster, 
 loadGame, meleeAttackAction, monsterAttack, performMonsterSkill, movePlayer, nextFloor,
 processMercenaryTurn, processProjectiles, processTurn, purifyTarget, 
 rangedAction, recallMercenaries, recruitHatchedSuperior, handleHatchedMonsterClick,
-removeEggFromIncubator, renderDungeon, reviveMercenary, reviveMonsterCorpse,
+removeEggFromIncubator, reviveMercenary, reviveMonsterCorpse,
  rollDice, saveGame, sellItem, confirmAndSell, enhanceItem, disassembleItem, setMercenaryLevel, setMonsterLevel, setChampionLevel,
 showChampionDetails, showItemDetailPanel, showItemTargetPanel, showMercenaryDetails,
 showMonsterDetails, showShop, showSkillDamage, showAuraDetails, skill1Action, skill2Action,
 spawnMercenaryNearPlayer, spawnStartingMaps, startGame, swapActiveAndStandby, tryApplyStatus,
-unequipAccessory, unequipWeapon, unequipArmor, unequipItemFromMercenary, updateActionButtons, updateCamera,
+unequipAccessory, unequipWeapon, unequipArmor, unequipItemFromMercenary, updateActionButtons,
 updateFogOfWar, updateIncubatorDisplay,
  updateInventoryDisplay, updateMaterialsDisplay, updateMercenaryDisplay,
  updateShopDisplay, updateSkillDisplay, updateStats, updateTurnEffects,
@@ -8982,9 +8527,6 @@ if (!(typeof navigator !== 'undefined' && navigator.userAgent &&
             }
         });
 
-        if (needsRender) {
-            renderDungeon(); // 아이콘이 변경되었으므로 던전을 다시 렌더링
-        }
     }, 1000); // 1초 간격
 }
 // ======================= 추가 끝 =======================

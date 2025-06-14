@@ -1,6 +1,6 @@
 // main.js
 
-import { assetLoader, renderGame } from './canvasRenderer.js';
+import { assetLoader, renderGame, updateTileSize } from './canvasRenderer.js';
 // 'ui.js' 파일이 src 폴더 안에 있다면 경로를 수정해주세요. 예: './src/ui.js'
 import './src/ui.js';
 
@@ -25,6 +25,8 @@ function resizeCanvas() {
     // 캔버스의 실제 해상도를 현재 보이는 창의 크기와 일치시킵니다.
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    // 화면 크기에 맞춰 타일 크기도 조정합니다.
+    updateTileSize(canvas.width, canvas.height);
     
     // 리사이즈 후 즉시 다시 그려서 빈 화면이 보이지 않게 합니다.
     if (window.isGameReady) {

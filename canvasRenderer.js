@@ -68,9 +68,8 @@ export const assetLoader = {
 };
 
 // 게임 맵의 타일 크기. 값이 작을수록 화면에 표시되는 이미지가 작아집니다.
-// 패널 내 아이콘 크기를 조정한 뒤에도 맵 이미지가 너무 크게 보인다는
-// 피드백이 있어 기본 타일 크기를 줄입니다.
-export let TILE_SIZE = 32;
+// 이전에는 다소 작게 느껴진다는 의견이 있어 기본값을 약간 키웠습니다.
+export let TILE_SIZE = 36;
 
 export function updateTileSize(width, height) {
     const base = Math.min(width, height);

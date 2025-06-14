@@ -1,8 +1,11 @@
 // main.js
 
 import { assetLoader, renderGame } from './canvasRenderer.js';
-import { gameState, startGame, processTurn, movePlayer, useSkill, saveGame, loadGame } from './src/mechanics.js';
 import { updateStats, updateInventoryDisplay, updateMercenaryDisplay, updateSkillDisplay, updateMaterialsDisplay } from './src/ui.js';
+
+// mechanics.js does not use ES module exports. It attaches its helpers to the
+// global `window` object, so we read them from there instead of importing.
+const { gameState, startGame, movePlayer, saveGame, loadGame } = window;
 
 // --- UI 요소 가져오기 ---
 const canvas = document.getElementById('game-canvas');

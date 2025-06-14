@@ -4,17 +4,52 @@
 export const assetLoader = {
     images: {},
     imageSources: {
+        // Player & Mercenaries
         player: 'assets/images/player.png',
-        floor: 'assets/images/floor-tile.png',
-        wall: 'assets/images/wall-tile.png',
-        zombie: 'assets/images/zombie.png',
         warrior: 'assets/images/warrior.png',
         archer: 'assets/images/archer.png',
         healer: 'assets/images/healer.png',
         wizard: 'assets/images/wizard.png',
         bard: 'assets/images/bard.png',
         paladin: 'assets/images/paladin.png',
-        // ... 필요한 모든 이미지 경로를 여기에 추가하세요 ...
+
+        // Monsters
+        zombie: 'assets/images/zombie.png',
+        goblin: 'assets/images/goblin.png',
+        goblin_archer: 'assets/images/goblin-archer.png',
+        goblin_wizard: 'assets/images/goblin-wizard.png',
+        orc: 'assets/images/orc.png',
+        orc_archer: 'assets/images/orc_archer.png',
+        skeleton: 'assets/images/skeleton.png',
+        skeleton_mage: 'assets/images/skeleton_mage.png',
+        troll: 'assets/images/troll.png',
+        dark_mage: 'assets/images/dark_mage.png',
+        dark_knight: 'assets/images/dark_knight.png',
+        demon_warrior: 'assets/images/demon_warrior.png',
+        slime: 'assets/images/slime.png',
+        kobold: 'assets/images/kobold.png',
+        gargoyle: 'assets/images/gargoyle.png',
+        banshee: 'assets/images/banshee.png',
+        minotaur: 'assets/images/minotaur.png',
+        lich: 'assets/images/lich.png',
+        dragon_whelp: 'assets/images/dragon_whelp.png',
+        elemental_golem: 'assets/images/elemental_golem.png',
+        boss: 'assets/images/boss.png',
+
+        // Tiles & Objects
+        floor: 'assets/images/floor-tile.png',
+        wall: 'assets/images/wall-tile.png',
+        chest: 'assets/images/chest.png',
+        corpse: 'assets/images/corpse.png',
+        gold: 'assets/images/gold.png',
+
+        // Items
+        shortsword: 'assets/images/shortsword.png',
+        bow: 'assets/images/bow.png',
+        leatherarmor: 'assets/images/leatherarmor.png',
+
+        // Effects
+        dark_nova_effect: 'assets/images/dark-nova-effect.png'
     },
 
     load(callback) {

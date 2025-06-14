@@ -72,83 +72,130 @@ const TILE_SIZE = 32; // 셀 하나의 크기
 // 게임 상태를 캔버스에 그리는 메인 함수
 export function renderGame(canvas, ctx, images, gameState) {
     if (!canvas || !ctx) return;
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // 1. 캔버스 초기화
-    ctx.imageSmoothingEnabled = false; // 픽셀 아트가 번지지 않게 설정
 
-    // 2. 카메라 위치 계산 (플레이어 중심)
-    const startX = Math.floor(gameState.player.x - (canvas.width / TILE_SIZE / 2));
-    const startY = Math.floor(gameState.player.y - (canvas.height / TILE_SIZE / 2));
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingEnabled = false;
 
-    // 3. 화면에 보이는 영역만 그리기
-    for (let y = 0; y < canvas.height / TILE_SIZE; y++) {
-        for (let x = 0; x < canvas.width / TILE_SIZE; x++) {
+    const visibleWidth = Math.ceil(canvas.width / TILE_SIZE);
+    const visibleHeight = Math.ceil(canvas.height / TILE_SIZE);
+
+    const startX = Math.floor(gameState.player.x - visibleWidth / 2);
+    const startY = Math.floor(gameState.player.y - visibleHeight / 2);
+
+    for (let y = 0; y < visibleHeight; y++) {
+        for (let x = 0; x < visibleWidth; x++) {
             const mapX = startX + x;
             const mapY = startY + y;
-
             const screenX = x * TILE_SIZE;
             const screenY = y * TILE_SIZE;
-
-            // 맵 경계를 벗어나면 그리지 않음
             if (mapX < 0 || mapY < 0 || mapX >= gameState.dungeonSize || mapY >= gameState.dungeonSize) continue;
 
-            // 안개 그리기
-            if (gameState.fogOfWar[mapY]?.[mapX]) {
-                 ctx.fillStyle = '#000';
-                 ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
-                 continue;
-            }
-
-            // 바닥 또는 벽 그리기
             const cellType = gameState.dungeon[mapY][mapX];
             const tileImage = (cellType === 'wall') ? images.wall : images.floor;
-            if(tileImage) ctx.drawImage(tileImage, screenX, screenY, TILE_SIZE, TILE_SIZE);
+            if (tileImage) ctx.drawImage(tileImage, screenX, screenY, TILE_SIZE, TILE_SIZE);
+            if (images[cellType]) ctx.drawImage(images[cellType], screenX, screenY, TILE_SIZE, TILE_SIZE);
 
-            // 아이템, 시체 등 다른 요소들 그리기...
-            // (이 부분은 gameState를 확인하며 drawImage로 추가 구현)
+            const item = gameState.items.find(it => it.x === mapX && it.y === mapY);
+            if (item && images[item.key]) ctx.drawImage(images[item.key], screenX, screenY, TILE_SIZE, TILE_SIZE);
+
+            const corpse = gameState.corpses && gameState.corpses.find(c => c.x === mapX && c.y === mapY);
+            if (corpse && images.corpse) ctx.drawImage(images.corpse, screenX, screenY, TILE_SIZE, TILE_SIZE);
         }
     }
-    
-    // 4. 유닛(몬스터, 용병, 플레이어) 그리기
-    const allUnits = [...gameState.monsters, ...gameState.activeMercenaries, gameState.player];
-    allUnits.forEach(unit => {
-        if(!unit || (unit.health !== undefined && unit.health <= 0)) return;
 
+    const allUnits = [...gameState.monsters, ...gameState.activeMercenaries, gameState.player]
+        .filter(u => u && (u.health === undefined || u.health > 0))
+        .sort((a, b) => a.y - b.y);
+    allUnits.forEach(unit => {
         const screenX = (unit.x - startX) * TILE_SIZE;
         const screenY = (unit.y - startY) * TILE_SIZE;
-
-        // 화면 밖에 있으면 그리지 않음
         if (screenX < -TILE_SIZE || screenX > canvas.width || screenY < -TILE_SIZE || screenY > canvas.height) return;
+        const key = unit.type ? unit.type.toLowerCase() : (unit.id === 'player' ? 'player' : 'zombie');
+        const img = images[key] || images.zombie;
+        if (img) ctx.drawImage(img, screenX, screenY, TILE_SIZE, TILE_SIZE);
+        drawHealthBar(ctx, screenX, screenY, TILE_SIZE, unit);
+        drawEffectIcons(ctx, screenX, screenY, TILE_SIZE, unit);
+    });
 
-        let unitImage;
-        if(unit === gameState.player) unitImage = images.player;
-        else unitImage = images[unit.type?.toLowerCase()] || images.zombie;
+    if (Array.isArray(gameState.projectiles)) {
+        ctx.font = '16px sans-serif';
+        gameState.projectiles.forEach(p => {
+            const sx = (p.x - startX) * TILE_SIZE;
+            const sy = (p.y - startY) * TILE_SIZE;
+            if (sx < -TILE_SIZE || sx > canvas.width || sy < -TILE_SIZE || sy > canvas.height) return;
+            ctx.fillText(p.icon || '⬤', sx + TILE_SIZE / 4, sy + TILE_SIZE / 2);
+        });
+    }
 
-        if(unitImage) ctx.drawImage(unitImage, screenX, screenY, TILE_SIZE, TILE_SIZE);
+    for (let y = 0; y < visibleHeight; y++) {
+        for (let x = 0; x < visibleWidth; x++) {
+            const mapX = startX + x;
+            const mapY = startY + y;
+            if (mapX < 0 || mapY < 0 || mapX >= gameState.dungeonSize || mapY >= gameState.dungeonSize) continue;
+            if (gameState.fogOfWar[mapY]?.[mapX]) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            }
+        }
+    }
+}
 
-        // 체력바 그리기
-        drawHealthBar(ctx, screenX, screenY, unit);
-        // 효과 아이콘 그리기
-        drawEffectIcons(ctx, screenX, screenY, unit);
+function drawHealthBar(ctx, x, y, size, unit) {
+    const maxHp = getStat(unit, 'maxHealth');
+    if (maxHp && unit.health < maxHp) {
+        const ratio = unit.health / maxHp;
+        ctx.fillStyle = '#333';
+        ctx.fillRect(x, y - 6, size, 4);
+        ctx.fillStyle = ratio > 0.5 ? '#0f0' : ratio > 0.25 ? '#ff0' : '#f00';
+        ctx.fillRect(x, y - 6, size * ratio, 4);
+    }
+}
+
+function drawEffectIcons(ctx, x, y, size, unit) {
+    ctx.font = '10px sans-serif';
+    ctx.fillStyle = 'white';
+    const buffIcons = getActiveBuffIcons(unit);
+    const debuffIcons = getActiveDebuffIcons(unit);
+    buffIcons.forEach((icon, idx) => {
+        ctx.fillText(icon, x + idx * 12, y - 5);
+    });
+    debuffIcons.forEach((icon, idx) => {
+        ctx.fillText(icon, x + idx * 12, y + size + 10);
     });
 }
 
-function drawHealthBar(ctx, x, y, unit) {
-    const maxHp = getStat(unit, 'maxHealth');
-    if (unit.health < maxHp) {
-        const hpRatio = unit.health / maxHp;
-        ctx.fillStyle = '#333';
-        ctx.fillRect(x, y - 6, TILE_SIZE, 4);
-        ctx.fillStyle = hpRatio > 0.5 ? '#0f0' : hpRatio > 0.25 ? '#ff0' : '#f00';
-        ctx.fillRect(x, y - 6, TILE_SIZE * hpRatio, 4);
+const STATUS_ICONS = {
+    poison: '☠️',
+    burn: '🔥',
+    freeze: '❄️',
+    bleed: '🩸',
+    paralysis: '⚡',
+    nightmare: '😱',
+    silence: '🤐',
+    petrify: '🪨',
+    debuff: '⬇️'
+};
+
+function getActiveBuffIcons(unit) {
+    const icons = [];
+    if (Array.isArray(unit.buffs)) {
+        unit.buffs.forEach(b => {
+            const defs = window.SKILL_DEFS || {};
+            const info = defs[b.name] || (window.MERCENARY_SKILLS && window.MERCENARY_SKILLS[b.name]) || (window.MONSTER_SKILLS && window.MONSTER_SKILLS[b.name]);
+            if (info && info.icon) icons.push(info.icon);
+        });
     }
+    if (unit.shield && unit.shieldTurns > 0) icons.push('🛡️');
+    if (unit.attackBuff && unit.attackBuffTurns > 0) icons.push('💪');
+    return icons;
 }
 
-function drawEffectIcons(ctx, x, y, unit) {
-    // 이 함수는 updateUnitEffectIcons를 대체합니다.
-    // 기존 로직을 가져와 ctx.fillText()를 사용해 아이콘을 그립니다.
-    // 예시: ctx.fillText('💪', x, y - 10);
-    // 이 부분은 게임 로직과 폰트 스타일에 맞춰 추가 구현이 필요합니다.
+function getActiveDebuffIcons(unit) {
+    const icons = [];
+    for (const key in STATUS_ICONS) {
+        if (unit[key]) icons.push(STATUS_ICONS[key]);
+    }
+    return icons;
 }
 
 // 이 파일에서 사용될 getStat 함수 (mechanics.js에도 동일 함수가 있음)

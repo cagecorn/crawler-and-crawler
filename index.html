@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>던전 크롤러 - Canvas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1><img src="assets/images/title.png" alt="던전 크롤러 로고" class="title-logo"></h1>
+    <div class="top-controls">
+        <button id="toggle-bgm">🔇 배경음</button>
+        <button id="vol-down">🔉-</button>
+        <button id="vol-up">🔊+</button>
+    </div>
+    <div id="turn-effects" class="turn-effects"></div>
+
+    <div class="main-container">
+        <div class="game-area">
+            <div class="dungeon-container">
+                <canvas id="game-canvas" width="650" height="650"></canvas>
+            </div>
+            <div class="message-log" id="message-log"></div>
+            <div class="controls">
+                <div class="controls-row" style="margin-top: 10px;">
+                    <button id="save-game" style="background: linear-gradient(45deg, #2196F3, #1976D2);">💾 게임 저장</button>
+                    <button id="load-game" style="background: linear-gradient(45deg, #FF9800, #F57C00);">📁 게임 불러오기</button>
+                    <button id="new-game" style="background: linear-gradient(45deg, #9E9E9E, #757575);">🔄 새 게임</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="middle-panel">
+             </div>
+        <div class="side-panel">
+            </div>
+    </div>
+    
+    <div id="shop-panel" class="shop-panel" style="display:none;"></div>
+    <div id="mercenary-detail-panel" class="details-panel" style="display:none;"></div>
+    <div id="monster-detail-panel" class="details-panel" style="display:none;"></div>
+    <div id="item-detail-panel" class="details-panel" style="display:none;"></div>
+    <div id="item-target-panel" class="details-panel" style="display:none;"></div>
+    <div id="crafting-detail-panel" class="details-panel" style="display:none;"></div>
+    <div id="corpse-panel" class="details-panel" style="display:none;"></div>
+    
+    <audio id="bgm-player" loop></audio>
+
+    <script src="dice.js"></script>
+    <script type="module" src="mechanics.js"></script>
+    <script type="module" src="ui.js"></script> <script type="module" src="canvasRenderer.js"></script> <script type="module" src="main.js"></script> </body>
+</html>

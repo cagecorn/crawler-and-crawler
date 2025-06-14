@@ -14,6 +14,8 @@ const { gameState, startGame, movePlayer, saveGame, loadGame } = window;
 // --- UI 요소 가져오기 ---
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
+// 이미지 스무딩(안티에일리어싱) 기능을 끕니다.
+ctx.imageSmoothingEnabled = false;
 let gameImages = {};
 
 const modalOverlay = document.getElementById('modal-overlay');

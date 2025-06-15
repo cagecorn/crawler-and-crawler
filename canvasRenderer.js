@@ -72,6 +72,12 @@ export function renderGame(canvas, ctx, images, gameState) {
     cameraX = Math.floor(cameraX);
     cameraY = Math.floor(cameraY);
 
+    // Store camera info so other modules can reference the current viewport
+    gameState.camera.x = cameraX;
+    gameState.camera.y = cameraY;
+    gameState.camera.width = Math.ceil(canvas.width / TILE_SIZE);
+    gameState.camera.height = Math.ceil(canvas.height / TILE_SIZE);
+
     const startCol = Math.max(0, cameraX);
     const endCol = Math.min(gameState.dungeonSize, cameraX + Math.ceil(canvas.width / TILE_SIZE) + 1);
     const startRow = Math.max(0, cameraY);

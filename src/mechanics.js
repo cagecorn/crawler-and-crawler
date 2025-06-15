@@ -6369,6 +6369,17 @@ function killMonster(monster, killer = null) {
             
             const newX = gameState.player.x + dx;
             const newY = gameState.player.y + dy;
+
+            // Prevent moving beyond the visible camera when the map is larger
+            if (typeof document !== 'undefined' && gameState.camera) {
+                const cam = gameState.camera;
+                const visW = cam.width || 0;
+                const visH = cam.height || 0;
+                const maxCamX = gameState.dungeonSize - visW;
+                const maxCamY = gameState.dungeonSize - visH;
+                if (visW && cam.x >= maxCamX && newX > cam.x + visW - 1) return;
+                if (visH && cam.y >= maxCamY && newY > cam.y + visH - 1) return;
+            }
             
             if (newX < 0 || newX >= gameState.dungeonSize || 
                 newY < 0 || newY >= gameState.dungeonSize) {

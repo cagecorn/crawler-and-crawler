@@ -24,36 +24,24 @@ const closeButtons = document.querySelectorAll('.close-btn');
 
 // --- [추가] 캔버스 크기 조절 함수 ---
 function resizeCanvas() {
-    const container = document.getElementById('game-container');
-    const displayWidth = container.clientWidth;
-    const displayHeight = container.clientHeight;
+    // 게임의 내부 해상도를 고정합니다. 16:9 비율의 해상도를 추천합니다.
+    const internalWidth = 480;
+    const internalHeight = 270;
 
-    // DPR(Device Pixel Ratio)는 1로 고정해서 픽셀 완벽을 유지합니다
-    // 고해상도 화면에서도 도트가 선명하게 보이도록 하는 설정입니다
-    const dpr = 1; // window.devicePixelRatio 대신 1로 고정
+    // 캔버스의 실제 해상도를 이 값으로 고정합니다.
+    canvas.width = internalWidth;
+    canvas.height = internalHeight;
 
-    // CSS 크기를 먼저 설정
-    canvas.style.width = displayWidth + 'px';
-    canvas.style.height = displayHeight + 'px';
+    // 이전에 적용했을 수 있는 모든 변환(transform)을 초기화합니다.
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-    // 실제 캔버스 해상도를 정수로 설정 (소수점 방지)
-    canvas.width = Math.floor(displayWidth);
-    canvas.height = Math.floor(displayHeight);
-
-    // 컨텍스트 변환 설정 (픽셀 완벽을 위해)
-    ctx.setTransform(1, 0, 0, 1, 0, 0); // dpr 대신 1 사용
-    
-    // 이미지 스무딩 끄기 (여러 브라우저 대응)
+    // 이미지 스무딩은 계속 비활성화 상태를 유지합니다.
     ctx.imageSmoothingEnabled = false;
-    ctx.webkitImageSmoothingEnabled = false;
-    ctx.mozImageSmoothingEnabled = false;
-    ctx.msImageSmoothingEnabled = false;
-    ctx.oImageSmoothingEnabled = false;
 
-    // 타일 크기 업데이트
-    updateTileSize(displayWidth, displayHeight);
+    // CSS가 캔버스를 화면에 맞게 확대/축소하므로, 타일 크기는 내부 해상도 기준으로 계산합니다.
+    updateTileSize(internalWidth, internalHeight);
 
-    // 리사이즈 후 즉시 다시 그리기
+    // 리사이즈 후 즉시 다시 그려서 빈 화면이 보이지 않게 합니다.
     if (window.isGameReady) {
         renderGame(canvas, ctx, gameImages, gameState);
     }

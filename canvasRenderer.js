@@ -86,8 +86,8 @@ export function renderGame(canvas, ctx, images, gameState) {
     // 타일, 지형지물, 아이템 그리기
     for (let y = startRow; y < endRow; y++) {
         for (let x = startCol; x < endCol; x++) {
-            const screenX = (x - cameraX) * TILE_SIZE;
-            const screenY = (y - cameraY) * TILE_SIZE;
+            const screenX = Math.floor((x - cameraX) * TILE_SIZE);
+            const screenY = Math.floor((y - cameraY) * TILE_SIZE);
 
             if (gameState.fogOfWar[y]?.[x]) {
                 ctx.fillStyle = '#000';
@@ -125,8 +125,8 @@ export function renderGame(canvas, ctx, images, gameState) {
     allUnits.forEach(unit => {
         if(!unit || (unit.health !== undefined && unit.health <= 0)) return;
 
-        const screenX = (unit.x - cameraX) * TILE_SIZE;
-        const screenY = (unit.y - cameraY) * TILE_SIZE;
+        const screenX = Math.floor((unit.x - cameraX) * TILE_SIZE);
+        const screenY = Math.floor((unit.y - cameraY) * TILE_SIZE);
 
         if (screenX < -TILE_SIZE || screenX > canvas.width || screenY < -TILE_SIZE || screenY > canvas.height) return;
 
@@ -145,9 +145,9 @@ function drawHealthBar(ctx, x, y, size, unit) { // [수정] size 매개변수 �
     if (maxHp > 0 && unit.health < maxHp) {
         const hpRatio = unit.health / maxHp;
         ctx.fillStyle = '#333';
-        ctx.fillRect(x, y - 8, size, 5); // [수정]
+        ctx.fillRect(Math.floor(x), Math.floor(y - 8), size, 5); // [수정]
         ctx.fillStyle = hpRatio > 0.5 ? '#4CAF50' : hpRatio > 0.25 ? '#FFC107' : '#F44336';
-        ctx.fillRect(x, y - 8, size * hpRatio, 5); // [수정]
+        ctx.fillRect(Math.floor(x), Math.floor(y - 8), Math.floor(size * hpRatio), 5); // [수정]
     }
 }
 

@@ -24,12 +24,23 @@ const closeButtons = document.querySelectorAll('.close-btn');
 
 // --- [추가] 캔버스 크기 조절 함수 ---
 function resizeCanvas() {
-    // 캔버스의 실제 해상도를 현재 보이는 창의 크기와 일치시킵니다.
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    // 화면 크기에 맞춰 타일 크기도 조정합니다.
-    updateTileSize(canvas.width, canvas.height);
-    
+    const displayWidth = window.innerWidth;
+    const displayHeight = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+
+    // CSS 크기를 먼저 설정해 비율을 고정합니다.
+    canvas.style.width = displayWidth + 'px';
+    canvas.style.height = displayHeight + 'px';
+
+    // 해상도는 실제 픽셀 수에 맞춰 조정합니다.
+    canvas.width = Math.floor(displayWidth * dpr);
+    canvas.height = Math.floor(displayHeight * dpr);
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+
+    updateTileSize(displayWidth, displayHeight);
+
     // 리사이즈 후 즉시 다시 그려서 빈 화면이 보이지 않게 합니다.
     if (window.isGameReady) {
         renderGame(canvas, ctx, gameImages, gameState);

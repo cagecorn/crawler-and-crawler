@@ -69,7 +69,7 @@ export const assetLoader = {
 
 // 게임 맵의 타일 크기. 값이 작을수록 화면에 표시되는 이미지가 작아집니다.
 // 이전에는 다소 작게 느껴진다는 의견이 있어 기본값을 약간 키웠습니다.
-export let TILE_SIZE = 36;
+export let TILE_SIZE = 48;
 
 export function updateTileSize(width, height) {
     const base = Math.min(width, height);

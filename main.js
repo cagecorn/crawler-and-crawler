@@ -27,22 +27,33 @@ function resizeCanvas() {
     const container = document.getElementById('game-container');
     const displayWidth = container.clientWidth;
     const displayHeight = container.clientHeight;
-    const dpr = window.devicePixelRatio || 1;
 
-    // CSS 크기를 먼저 설정해 비율을 고정합니다.
+    // DPR(Device Pixel Ratio)는 1로 고정해서 픽셀 완벽을 유지합니다
+    // 고해상도 화면에서도 도트가 선명하게 보이도록 하는 설정입니다
+    const dpr = 1; // window.devicePixelRatio 대신 1로 고정
+
+    // CSS 크기를 먼저 설정
     canvas.style.width = displayWidth + 'px';
     canvas.style.height = displayHeight + 'px';
 
-    // 해상도는 실제 픽셀 수에 맞춰 조정합니다.
-    canvas.width = Math.floor(displayWidth * dpr);
-    canvas.height = Math.floor(displayHeight * dpr);
+    // 실제 캔버스 해상도를 정수로 설정 (소수점 방지)
+    canvas.width = Math.floor(displayWidth);
+    canvas.height = Math.floor(displayHeight);
 
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // 컨텍스트 변환 설정 (픽셀 완벽을 위해)
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // dpr 대신 1 사용
+    
+    // 이미지 스무딩 끄기 (여러 브라우저 대응)
     ctx.imageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.msImageSmoothingEnabled = false;
+    ctx.oImageSmoothingEnabled = false;
 
+    // 타일 크기 업데이트
     updateTileSize(displayWidth, displayHeight);
 
-    // 리사이즈 후 즉시 다시 그려서 빈 화면이 보이지 않게 합니다.
+    // 리사이즈 후 즉시 다시 그리기
     if (window.isGameReady) {
         renderGame(canvas, ctx, gameImages, gameState);
     }

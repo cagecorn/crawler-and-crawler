@@ -61,13 +61,14 @@ export function renderGame(canvas, ctx, images, gameState) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.imageSmoothingEnabled = false;
 
-    const halfScreenTilesX = canvas.width / TILE_SIZE / 2;
-    const halfScreenTilesY = canvas.height / TILE_SIZE / 2;
+    // 화면상의 실제 크기 기준으로 카메라 범위를 계산한다
+    const halfScreenTilesX = canvas.clientWidth / TILE_SIZE / 2;
+    const halfScreenTilesY = canvas.clientHeight / TILE_SIZE / 2;
     let cameraX = gameState.player.x - halfScreenTilesX;
     let cameraY = gameState.player.y - halfScreenTilesY;
 
-    cameraX = Math.max(0, Math.min(cameraX, gameState.dungeonSize - canvas.width / TILE_SIZE));
-    cameraY = Math.max(0, Math.min(cameraY, gameState.dungeonSize - canvas.height / TILE_SIZE));
+    cameraX = Math.max(0, Math.min(cameraX, gameState.dungeonSize - canvas.clientWidth / TILE_SIZE));
+    cameraY = Math.max(0, Math.min(cameraY, gameState.dungeonSize - canvas.clientHeight / TILE_SIZE));
 
     cameraX = Math.floor(cameraX);
     cameraY = Math.floor(cameraY);
@@ -75,13 +76,13 @@ export function renderGame(canvas, ctx, images, gameState) {
     // Store camera info so other modules can reference the current viewport
     gameState.camera.x = cameraX;
     gameState.camera.y = cameraY;
-    gameState.camera.width = Math.ceil(canvas.width / TILE_SIZE);
-    gameState.camera.height = Math.ceil(canvas.height / TILE_SIZE);
+    gameState.camera.width = Math.ceil(canvas.clientWidth / TILE_SIZE);
+    gameState.camera.height = Math.ceil(canvas.clientHeight / TILE_SIZE);
 
     const startCol = Math.max(0, cameraX);
-    const endCol = Math.min(gameState.dungeonSize, cameraX + Math.ceil(canvas.width / TILE_SIZE) + 1);
+    const endCol = Math.min(gameState.dungeonSize, cameraX + Math.ceil(canvas.clientWidth / TILE_SIZE) + 1);
     const startRow = Math.max(0, cameraY);
-    const endRow = Math.min(gameState.dungeonSize, cameraY + Math.ceil(canvas.height / TILE_SIZE) + 1);
+    const endRow = Math.min(gameState.dungeonSize, cameraY + Math.ceil(canvas.clientHeight / TILE_SIZE) + 1);
 
     // 타일, 지형지물, 아이템 그리기
     for (let y = startRow; y < endRow; y++) {

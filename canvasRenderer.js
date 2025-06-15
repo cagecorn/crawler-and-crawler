@@ -60,11 +60,14 @@ export function renderGame(canvas, ctx, images, gameState) {
 
     const halfScreenTilesX = canvas.width / TILE_SIZE / 2;
     const halfScreenTilesY = canvas.height / TILE_SIZE / 2;
-    let cameraX = Math.floor(gameState.player.x - halfScreenTilesX);
-    let cameraY = Math.floor(gameState.player.y - halfScreenTilesY);
+    let cameraX = gameState.player.x - halfScreenTilesX;
+    let cameraY = gameState.player.y - halfScreenTilesY;
 
     cameraX = Math.max(0, Math.min(cameraX, gameState.dungeonSize - canvas.width / TILE_SIZE));
     cameraY = Math.max(0, Math.min(cameraY, gameState.dungeonSize - canvas.height / TILE_SIZE));
+
+    cameraX = Math.floor(cameraX);
+    cameraY = Math.floor(cameraY);
 
     const startCol = Math.max(0, cameraX);
     const endCol = Math.min(gameState.dungeonSize, cameraX + Math.ceil(canvas.width / TILE_SIZE) + 1);

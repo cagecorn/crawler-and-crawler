@@ -24,6 +24,9 @@ export const assetLoader = {
         healer: 'assets/images/healer.png',
         bard: 'assets/images/bard.png',
         paladin: 'assets/images/paladin.png',
+        item: 'assets/images/gold.png',
+        corpse: 'assets/images/corpse.png',
+        chest: 'assets/images/chest.png',
         // ... 필요한 모든 이미지 경로 추가 ...
     },
     load(callback) {
@@ -88,10 +91,25 @@ export function renderGame(canvas, ctx, images, gameState) {
 
             const cellType = gameState.dungeon[y][x];
             const tileImage = (cellType === 'wall') ? images.wall : images.floor;
-            if(tileImage) ctx.drawImage(tileImage, screenX, screenY, TILE_SIZE, TILE_SIZE); // [수정]
+            if(tileImage) ctx.drawImage(tileImage, screenX, screenY, TILE_SIZE, TILE_SIZE);
 
             if (images[cellType]) {
-                ctx.drawImage(images[cellType], screenX, screenY, TILE_SIZE, TILE_SIZE); // [수정]
+                ctx.drawImage(images[cellType], screenX, screenY, TILE_SIZE, TILE_SIZE);
+            } else {
+                const colors = {
+                    chest: '#B8860B',
+                    mine: '#888',
+                    tree: '#228B22',
+                    bones: '#DDD',
+                    grave: '#555',
+                    altar: '#FFCC00',
+                    exit: '#00FFFF',
+                    shop: '#FF69B4'
+                };
+                if (colors[cellType]) {
+                    ctx.fillStyle = colors[cellType];
+                    ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                }
             }
         }
     }

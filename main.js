@@ -106,31 +106,92 @@ function gameLoop() {
 }
 
 
-// --- 게임 시작점 ---
-window.isGameReady = false; // 게임 준비 완료 플래그
+// --- [전체 교체] 게임 시작점 및 이벤트 리스너 설정 ---
+window.isGameReady = false;
 window.onload = () => {
-    resizeCanvas(); // [추가] 최초 실행 시 캔버스 크기를 먼저 설정합니다.
+    resizeCanvas();
 
     assetLoader.load((loadedImages) => {
         gameImages = loadedImages;
         console.log("모든 이미지 로딩 완료!");
 
-        startGame(); 
-        
-        window.isGameReady = true; 
-        gameLoop();  
+        startGame();
 
-        // 키보드 입력 처리
+        window.isGameReady = true;
+        gameLoop();
+
+        // --- 1. 키보드 입력 처리 ---
         document.addEventListener('keydown', (e) => {
-            if (!gameState.gameRunning) return; 
-            
-            e.preventDefault();
-            switch (e.key) {
-                case 'ArrowUp': movePlayer(0, -1); break;
-                case 'ArrowDown': movePlayer(0, 1); break;
-                case 'ArrowLeft': movePlayer(-1, 0); break;
-                case 'ArrowRight': movePlayer(1, 0); break;
-                // 기타 필요한 단축키 추가...
+            // 모달창이 열려 있을 때는 게임 입력을 받지 않습니다.
+            if (!gameState.gameRunning) return;
+
+            e.preventDefault(); // 페이지 스크롤 등 브라우저 기본 동작 방지
+            switch (e.key.toLowerCase()) { // toLowerCase()로 대소문자 모두 처리
+                // 이동
+                case 'arrowup': movePlayer(0, -1); break;
+                case 'arrowdown': movePlayer(0, 1); break;
+                case 'arrowleft': movePlayer(-1, 0); break;
+                case 'arrowright': movePlayer(1, 0); break;
+
+                // 액션
+                case 'f':
+                case 'z':
+                    meleeAttackAction();
+                    break;
+                case 'x':
+                    skill1Action();
+                    break;
+                case 'c':
+                    skill2Action();
+                    break;
+                case 'v':
+                    rangedAction();
+                    break;
+                case 'a':
+                    recallMercenaries();
+                    break;
+                case 'b':
+                    pickUpAction();
+                    break;
+            }
+        });
+
+        // --- 2. 마우스 클릭 처리 ---
+        canvas.addEventListener('click', (event) => {
+            if (!gameState.gameRunning) return;
+
+            // 2.1. 화면 좌표를 게임 맵 좌표로 변환
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mouseX = (event.clientX - rect.left) * scaleX;
+            const mouseY = (event.clientY - rect.top) * scaleY;
+
+            const TILE_SIZE = 32;
+            const startX = Math.floor(gameState.player.x - (canvas.width / TILE_SIZE / 2));
+            const startY = Math.floor(gameState.player.y - (canvas.height / TILE_SIZE / 2));
+
+            const mapX = Math.floor(mouseX / TILE_SIZE) + startX;
+            const mapY = Math.floor(mouseY / TILE_SIZE) + startY;
+
+            // 2.2. 클릭된 위치에 있는 유닛 확인
+            const clickedMonster = gameState.monsters.find(m => m.x === mapX && m.y === mapY);
+            if (clickedMonster) {
+                showMonsterDetails(clickedMonster); // 몬스터 정보창 표시
+                return;
+            }
+
+            const clickedMerc = gameState.activeMercenaries.find(m => m.x === mapX && m.y === mapY && m.alive);
+            if (clickedMerc) {
+                showMercenaryDetails(clickedMerc); // 용병 정보창 표시
+                return;
+            }
+
+            // 2.3. 빈 공간 클릭 시 자동 이동
+            const path = findPath(gameState.player.x, gameState.player.y, mapX, mapY);
+            if (path && path.length > 1) {
+                gameState.autoMovePath = path.slice(1);
+                autoMoveStep();
             }
         });
     });

@@ -1,7 +1,7 @@
 // canvasRenderer.js
 
 // [수정] 원하는 타일 크기로 설정합니다. 48, 64 등 자유롭게 조절해보세요.
-export const TILE_SIZE = 48;
+export const TILE_SIZE = 64;
 
 // 이미지 로딩을 위한 객체
 export const assetLoader = {

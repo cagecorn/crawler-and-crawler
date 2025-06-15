@@ -1,15 +1,15 @@
 // main.js
 
 import { assetLoader, renderGame, updateTileSize } from './canvasRenderer.js';
-// 'ui.js' 파일이 src 폴더 안에 있다면 경로를 수정해주세요. 예: './src/ui.js'
-import './src/ui.js';
-
-// `ui.js` attaches its helper functions to the global `window` object. Read them
-// from there instead of using ES module exports.
-const { updateStats, updateInventoryDisplay, updateMercenaryDisplay, updateSkillDisplay, updateMaterialsDisplay } = window;
-// mechanics.js도 마찬가지로 src 폴더 안에 있다면 경로를 수정해주세요.
-// mechanics.js에서 전역(window)으로 노출된 객체와 함수를 사용합니다.
-const { gameState, startGame, movePlayer, saveGame, loadGame } = window;
+// ui.js와 mechanics.js의 경로가 src 폴더 안이라면 './src/ui.js' 와 같이 수정해주세요.
+import { updateStats, updateInventoryDisplay, updateMercenaryDisplay, updateSkillDisplay, updateMaterialsDisplay, showMonsterDetails, showMercenaryDetails } from './src/ui.js';
+import {
+    gameState, startGame, processTurn, movePlayer,
+    skill1Action, skill2Action, meleeAttackAction, rangedAction, healAction,
+    recallMercenaries, pickUpAction,
+    findPath, autoMoveStep,
+    saveGame, loadGame
+} from './src/mechanics.js';
 
 // --- UI 요소 가져오기 ---
 const canvas = document.getElementById('game-canvas');

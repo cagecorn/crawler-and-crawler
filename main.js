@@ -3,13 +3,15 @@
 import { assetLoader, renderGame, updateTileSize } from './canvasRenderer.js';
 // ui.js와 mechanics.js의 경로가 src 폴더 안이라면 './src/ui.js' 와 같이 수정해주세요.
 import { updateStats, updateInventoryDisplay, updateMercenaryDisplay, updateSkillDisplay, updateMaterialsDisplay, showMonsterDetails, showMercenaryDetails } from './src/ui.js';
-import {
+import './src/mechanics.js';
+
+const {
     gameState, startGame, processTurn, movePlayer,
     skill1Action, skill2Action, meleeAttackAction, rangedAction, healAction,
     recallMercenaries, pickUpAction,
     findPath, autoMoveStep,
     saveGame, loadGame
-} from './src/mechanics.js';
+} = window;
 
 // --- UI 요소 가져오기 ---
 const canvas = document.getElementById('game-canvas');

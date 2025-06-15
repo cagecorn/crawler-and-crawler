@@ -84,8 +84,9 @@ export function renderGame(canvas, ctx, images, gameState) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.imageSmoothingEnabled = false;
 
-    const visibleWidth = Math.ceil(canvas.width / TILE_SIZE);
-    const visibleHeight = Math.ceil(canvas.height / TILE_SIZE);
+    const dpr = window.devicePixelRatio || 1;
+    const visibleWidth = Math.ceil(canvas.width / dpr / TILE_SIZE);
+    const visibleHeight = Math.ceil(canvas.height / dpr / TILE_SIZE);
 
     const startX = Math.floor(gameState.player.x - visibleWidth / 2);
     const startY = Math.floor(gameState.player.y - visibleHeight / 2);

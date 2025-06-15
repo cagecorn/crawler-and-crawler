@@ -24,8 +24,9 @@ const closeButtons = document.querySelectorAll('.close-btn');
 
 // --- [추가] 캔버스 크기 조절 함수 ---
 function resizeCanvas() {
-    const displayWidth = window.innerWidth;
-    const displayHeight = window.innerHeight;
+    const container = document.getElementById('game-container');
+    const displayWidth = container.clientWidth;
+    const displayHeight = container.clientHeight;
     const dpr = window.devicePixelRatio || 1;
 
     // CSS 크기를 먼저 설정해 비율을 고정합니다.

@@ -4,10 +4,9 @@
 export let TILE_SIZE = 128;
 
 // 화면 크기에 맞춰 타일 크기를 동적으로 조절합니다.
-export function updateTileSize(displayWidth, displayHeight) {
-    const base = Math.min(displayWidth, displayHeight);
-    // 너무 크거나 작지 않도록 범위를 제한합니다.
-    TILE_SIZE = Math.max(32, Math.min(96, Math.floor(base / 20)));
+export function updateTileSize() {
+    // 이제 화면 크기와 무관하게 고정된 타일 크기를 사용합니다.
+    TILE_SIZE = 128;
 }
 
 // 이미지 로딩을 위한 객체

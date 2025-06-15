@@ -1,6 +1,6 @@
 // main.js
 
-import { assetLoader, renderGame, updateTileSize } from './canvasRenderer.js';
+import { assetLoader, renderGame, updateTileSize, TILE_SIZE } from './canvasRenderer.js';
 // 게임 로직과 UI 헬퍼를 초기화합니다.
 import './src/mechanics.js';
 import './src/ui.js';
@@ -44,7 +44,7 @@ function resizeCanvas() {
     ctx.imageSmoothingEnabled = false;
 
     // CSS가 캔버스를 화면에 맞게 확대/축소하므로, 타일 크기는 내부 해상도 기준으로 계산합니다.
-    updateTileSize(internalWidth, internalHeight);
+    updateTileSize();
 
     // 리사이즈 후 즉시 다시 그려서 빈 화면이 보이지 않게 합니다.
     if (window.isGameReady) {
@@ -172,7 +172,6 @@ window.onload = () => {
             const mouseX = (event.clientX - rect.left) * scaleX;
             const mouseY = (event.clientY - rect.top) * scaleY;
 
-            const TILE_SIZE = 32;
             const startX = Math.floor(gameState.player.x - (canvas.width / TILE_SIZE / 2));
             const startY = Math.floor(gameState.player.y - (canvas.height / TILE_SIZE / 2));
 

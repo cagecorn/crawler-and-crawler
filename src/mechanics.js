@@ -7418,6 +7418,24 @@ function processTurn() {
 
             const playerDistance = getDistance(mercenary.x, mercenary.y, gameState.player.x, gameState.player.y);
 
+            if (mercenary.role === 'support') {
+                const purifyInfo = MERCENARY_SKILLS[mercenary.skill2];
+                if (purifyInfo && mercenary.skill2 === 'Purify' && !(mercenary.skillCooldowns[mercenary.skill2] > 0) &&
+                    mercenary.mana >= getSkillManaCost(mercenary, purifyInfo)) {
+                    const targets = [gameState.player, ...gameState.activeMercenaries.filter(m => m.alive)];
+                    const hasStatus = t => t.poison || t.burn || t.freeze || t.bleed || t.paralysis || t.nightmare || t.silence || t.petrify || t.debuff;
+                    const range = getSkillRange(mercenary, purifyInfo);
+                    const target = targets.find(t => hasStatus(t) && getDistance(mercenary.x, mercenary.y, t.x, t.y) <= range);
+                    if (target && purifyTarget(mercenary, target, purifyInfo)) {
+                        mercenary.mana -= getSkillManaCost(mercenary, purifyInfo);
+                        mercenary.skillCooldowns[mercenary.skill2] = getSkillCooldown(mercenary, purifyInfo);
+                        updateMercenaryDisplay();
+                        mercenary.hasActed = true;
+                        return;
+                    }
+                }
+            }
+
             // [최적화] 주변에 적이 있을 때만 전투 AI를 실행합니다.
             if (visibleMonsters.length > 0) {
                 const skillInfo = MERCENARY_SKILLS[mercenary.skill] || MONSTER_SKILLS[mercenary.skill];

@@ -6,12 +6,51 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="game-canvas"></canvas>
+    <div id="layout">
+        <div id="top-area">
+            <div id="game-container">
+                <canvas id="game-canvas"></canvas>
+            </div>
+            <div id="stats-panel" class="side-panel">
+                <h2>🛡️ 플레이어 정보</h2>
+                <div>📊 레벨: <span id="level">1</span></div>
+                <div>📚 스킬포인트: <span id="skillPoints">0</span></div>
+                <div>✨ 스탯포인트: <span id="statPoints">0</span></div>
+                <div>💪 힘: <span id="strengthStat" onclick="allocateStat('strength')">5</span></div>
+                <div>🏃 민첩: <span id="agilityStat" onclick="allocateStat('agility')">5</span></div>
+                <div>🛡 체력: <span id="enduranceStat" onclick="allocateStat('endurance')">10</span></div>
+                <div>🔮 집중: <span id="focusStat" onclick="allocateStat('focus')">5</span></div>
+                <div>📖 지능: <span id="intelligenceStat" onclick="allocateStat('intelligence')">0</span></div>
+                <div>❤️ 체력: <span id="health">20</span>/<span id="maxHealth">20</span><span id="shield" class="shield-text"></span></div>
+                <div>🔋 마나: <span id="mana">10</span>/<span id="maxMana">10</span></div>
+                <div class="health-bar-container">
+                    <div class="shield-bar" id="shield-bar"></div>
+                    <div class="health-bar" id="hp-bar"></div>
+                </div>
+                <div class="mana-bar-container">
+                    <div class="mana-bar" id="mp-bar"></div>
+                </div>
+                <div>🍗 배부름: <span id="fullness">0</span></div>
+                <div>❤️‍🩹 회복력: <span id="healthRegen">0</span></div>
+                <div>🔁 마나회복: <span id="manaRegen">0.5</span></div>
+                <div>⚔️ 공격력: <span id="attackStat">5</span> <span id="weaponBonus"></span><span id="attackBuff" class="attack-buff-text"></span></div>
+                <div>🛡️ 방어력: <span id="defense">1</span> <span id="armorBonus"></span></div>
+                <div>🎯 명중률: <span id="accuracy">0.8</span></div>
+                <div>💨 회피율: <span id="evasion">0.1</span></div>
+                <div>💥 치명타: <span id="critChance">0.05</span></div>
+                <div>🔮 마법공격: <span id="magicPower">0</span></div>
+                <div>✨ 마법방어: <span id="magicResist">0</span></div>
+                <div>⭐ 경험치: <span id="exp">0</span>/<span id="expNeeded">20</span></div>
+                <div><img src="assets/images/gold.png" class="inline-icon"> 골드: <span id="gold">0</span></div>
+                <div>🏰 층: <span id="floor">1</span></div>
+                <div id="equipped-tile-side">타일: 없음</div>
+                <div id="turn-effects"></div>
+            </div>
+        </div>
+        <div id="message-log"></div>
     </div>
 
     <div id="top-menu-bar">
-        <button class="menu-btn" data-panel-id="stats-panel">내 정보</button>
         <button class="menu-btn" data-panel-id="inventory-panel">인벤토리</button>
         <button class="menu-btn" data-panel-id="mercenary-panel">용병 부대</button>
         <button class="menu-btn" data-panel-id="skills-panel">스킬</button>
@@ -20,43 +59,6 @@
     </div>
 
     <div id="modal-overlay" class="hidden">
-        
-        <div id="stats-panel" class="modal-panel">
-            <button class="close-btn">X</button>
-            <h2>🛡️ 플레이어 정보</h2>
-            <div>📊 레벨: <span id="level">1</span></div>
-            <div>📚 스킬포인트: <span id="skillPoints">0</span></div>
-            <div>✨ 스탯포인트: <span id="statPoints">0</span></div>
-            <div>💪 힘: <span id="strengthStat" onclick="allocateStat('strength')">5</span></div>
-            <div>🏃 민첩: <span id="agilityStat" onclick="allocateStat('agility')">5</span></div>
-            <div>🛡 체력: <span id="enduranceStat" onclick="allocateStat('endurance')">10</span></div>
-            <div>🔮 집중: <span id="focusStat" onclick="allocateStat('focus')">5</span></div>
-            <div>📖 지능: <span id="intelligenceStat" onclick="allocateStat('intelligence')">0</span></div>
-            <div>❤️ 체력: <span id="health">20</span>/<span id="maxHealth">20</span><span id="shield" class="shield-text"></span></div>
-            <div>🔋 마나: <span id="mana">10</span>/<span id="maxMana">10</span></div>
-            <div class="health-bar-container">
-                <div class="shield-bar" id="shield-bar"></div>
-                <div class="health-bar" id="hp-bar"></div>
-            </div>
-            <div class="mana-bar-container">
-                <div class="mana-bar" id="mp-bar"></div>
-            </div>
-            <div>🍗 배부름: <span id="fullness">0</span></div>
-            <div>❤️‍🩹 회복력: <span id="healthRegen">0</span></div>
-            <div>🔁 마나회복: <span id="manaRegen">0.5</span></div>
-            <div>⚔️ 공격력: <span id="attackStat">5</span> <span id="weaponBonus"></span><span id="attackBuff" class="attack-buff-text"></span></div>
-            <div>🛡️ 방어력: <span id="defense">1</span> <span id="armorBonus"></span></div>
-            <div>🎯 명중률: <span id="accuracy">0.8</span></div>
-            <div>💨 회피율: <span id="evasion">0.1</span></div>
-            <div>💥 치명타: <span id="critChance">0.05</span></div>
-            <div>🔮 마법공격: <span id="magicPower">0</span></div>
-            <div>✨ 마법방어: <span id="magicResist">0</span></div>
-            <div>⭐ 경험치: <span id="exp">0</span>/<span id="expNeeded">20</span></div>
-            <div><img src="assets/images/gold.png" class="inline-icon"> 골드: <span id="gold">0</span></div>
-            <div>🏰 층: <span id="floor">1</span></div>
-            <div id="equipped-tile-side">타일: 없음</div>
-            <div id="turn-effects"></div>
-        </div>
 
         <div id="inventory-panel" class="modal-panel wide">
             <button class="close-btn">X</button>
@@ -132,7 +134,6 @@
 
     <div id="game-over-panel" style="display:none;"></div>
     <div id="item-detail-panel" class="details-panel" style="display:none;"></div>
-    <div id="message-log"></div>
 
     <script src="dice.js"></script>
     <script type="module" src="./src/state.js"></script>

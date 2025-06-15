@@ -57,38 +57,50 @@ export const assetLoader = {
 // 게임 상태를 캔버스에 그리는 메인 함수
 export function renderGame(canvas, ctx, images, gameState) {
     if (!canvas || !ctx) return;
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.imageSmoothingEnabled = false;
 
-    // 화면상의 실제 크기 기준으로 카메라 범위를 계산한다
-    const halfScreenTilesX = canvas.clientWidth / TILE_SIZE / 2;
-    const halfScreenTilesY = canvas.clientHeight / TILE_SIZE / 2;
+    // 캔버스를 지웁니다
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 픽셀 완벽을 위한 설정들 (중요!)
+    ctx.imageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;  // Safari
+    ctx.mozImageSmoothingEnabled = false;     // Firefox
+    ctx.msImageSmoothingEnabled = false;      // IE
+    ctx.oImageSmoothingEnabled = false;       // Opera
+
+    // 픽셀이 정확한 위치에 그려지도록 하는 추가 설정
+    ctx.save();
+
+    // 카메라 계산 부분...
+    const halfScreenTilesX = canvas.width / TILE_SIZE / 2;
+    const halfScreenTilesY = canvas.height / TILE_SIZE / 2;
     let cameraX = gameState.player.x - halfScreenTilesX;
     let cameraY = gameState.player.y - halfScreenTilesY;
 
-    cameraX = Math.max(0, Math.min(cameraX, gameState.dungeonSize - canvas.clientWidth / TILE_SIZE));
-    cameraY = Math.max(0, Math.min(cameraY, gameState.dungeonSize - canvas.clientHeight / TILE_SIZE));
+    cameraX = Math.max(0, Math.min(cameraX, gameState.dungeonSize - canvas.width / TILE_SIZE));
+    cameraY = Math.max(0, Math.min(cameraY, gameState.dungeonSize - canvas.height / TILE_SIZE));
 
-    cameraX = Math.floor(cameraX);
-    cameraY = Math.floor(cameraY);
+    // 중요: 카메라 위치를 정수로 반올림해서 픽셀이 정확한 위치에 오도록 합니다
+    cameraX = Math.round(cameraX);
+    cameraY = Math.round(cameraY);
 
-    // Store camera info so other modules can reference the current viewport
+    // 카메라 정보 저장
     gameState.camera.x = cameraX;
     gameState.camera.y = cameraY;
-    gameState.camera.width = Math.ceil(canvas.clientWidth / TILE_SIZE);
-    gameState.camera.height = Math.ceil(canvas.clientHeight / TILE_SIZE);
+    gameState.camera.width = Math.ceil(canvas.width / TILE_SIZE);
+    gameState.camera.height = Math.ceil(canvas.height / TILE_SIZE);
 
     const startCol = Math.max(0, cameraX);
-    const endCol = Math.min(gameState.dungeonSize, cameraX + Math.ceil(canvas.clientWidth / TILE_SIZE) + 1);
+    const endCol = Math.min(gameState.dungeonSize, cameraX + Math.ceil(canvas.width / TILE_SIZE) + 1);
     const startRow = Math.max(0, cameraY);
-    const endRow = Math.min(gameState.dungeonSize, cameraY + Math.ceil(canvas.clientHeight / TILE_SIZE) + 1);
+    const endRow = Math.min(gameState.dungeonSize, cameraY + Math.ceil(canvas.height / TILE_SIZE) + 1);
 
-    // 타일, 지형지물, 아이템 그리기
+    // 타일 그리기 (픽셀 완벽하게)
     for (let y = startRow; y < endRow; y++) {
         for (let x = startCol; x < endCol; x++) {
-            const screenX = Math.floor((x - cameraX) * TILE_SIZE);
-            const screenY = Math.floor((y - cameraY) * TILE_SIZE);
+            // 중요: 화면 좌표를 정수로 반올림합니다
+            const screenX = Math.round((x - cameraX) * TILE_SIZE);
+            const screenY = Math.round((y - cameraY) * TILE_SIZE);
 
             if (gameState.fogOfWar[y]?.[x]) {
                 ctx.fillStyle = '#000';
@@ -98,7 +110,11 @@ export function renderGame(canvas, ctx, images, gameState) {
 
             const cellType = gameState.dungeon[y][x];
             const tileImage = (cellType === 'wall') ? images.wall : images.floor;
-            if(tileImage) ctx.drawImage(tileImage, screenX, screenY, TILE_SIZE, TILE_SIZE);
+            
+            // 이미지를 정확한 픽셀 위치에 그립니다
+            if(tileImage) {
+                ctx.drawImage(tileImage, screenX, screenY, TILE_SIZE, TILE_SIZE);
+            }
 
             if (images[cellType]) {
                 ctx.drawImage(images[cellType], screenX, screenY, TILE_SIZE, TILE_SIZE);
@@ -121,40 +137,53 @@ export function renderGame(canvas, ctx, images, gameState) {
         }
     }
 
-    // 유닛(몬스터, 용병, 플레이어)과 UI 그리기
+    // 유닛 그리기 (픽셀 완벽하게)
     const allUnits = [...gameState.monsters, ...gameState.activeMercenaries, gameState.player].sort((a, b) => a.y - b.y);
     allUnits.forEach(unit => {
         if(!unit || (unit.health !== undefined && unit.health <= 0)) return;
 
-        const screenX = Math.floor((unit.x - cameraX) * TILE_SIZE);
-        const screenY = Math.floor((unit.y - cameraY) * TILE_SIZE);
+        // 중요: 유닛 위치도 정수로 반올림합니다
+        const screenX = Math.round((unit.x - cameraX) * TILE_SIZE);
+        const screenY = Math.round((unit.y - cameraY) * TILE_SIZE);
 
         if (screenX < -TILE_SIZE || screenX > canvas.width || screenY < -TILE_SIZE || screenY > canvas.height) return;
 
         const unitImageKey = unit.type ? unit.type.toLowerCase() : (unit.id === 'player' ? 'player' : 'zombie');
         const unitImage = images[unitImageKey] || images.zombie;
         
-        if (unitImage) ctx.drawImage(unitImage, screenX, screenY, TILE_SIZE, TILE_SIZE); // [수정]
+        if (unitImage) {
+            ctx.drawImage(unitImage, screenX, screenY, TILE_SIZE, TILE_SIZE);
+        }
 
-        drawHealthBar(ctx, screenX, screenY, TILE_SIZE, unit); // [수정]
-        drawEffectIcons(ctx, screenX, screenY, TILE_SIZE, unit); // [수정]
+        drawHealthBar(ctx, screenX, screenY, TILE_SIZE, unit);
+        drawEffectIcons(ctx, screenX, screenY, TILE_SIZE, unit);
     });
+    
+    ctx.restore();
 }
 
-function drawHealthBar(ctx, x, y, size, unit) { // [수정] size 매개변수 추가
+// 체력바 그리기 함수도 픽셀 완벽하게 수정
+function drawHealthBar(ctx, x, y, size, unit) {
     const maxHp = getStat(unit, 'maxHealth');
     if (maxHp > 0 && unit.health < maxHp) {
         const hpRatio = unit.health / maxHp;
+        
+        // 정수 좌표로 그리기
+        const barX = Math.round(x);
+        const barY = Math.round(y - 8);
+        const barWidth = Math.round(size);
+        const barHeight = 5;
+        const fillWidth = Math.round(size * hpRatio);
+        
         ctx.fillStyle = '#333';
-        ctx.fillRect(Math.floor(x), Math.floor(y - 8), size, 5); // [수정]
+        ctx.fillRect(barX, barY, barWidth, barHeight);
         ctx.fillStyle = hpRatio > 0.5 ? '#4CAF50' : hpRatio > 0.25 ? '#FFC107' : '#F44336';
-        ctx.fillRect(Math.floor(x), Math.floor(y - 8), Math.floor(size * hpRatio), 5); // [수정]
+        ctx.fillRect(barX, barY, fillWidth, barHeight);
     }
 }
 
-function drawEffectIcons(ctx, x, y, size, unit) { // [수정] size 매개변수 추가
-    // 이 함수는 나중에 버프/디버프 아이콘을 그릴 때 사용됩니다.
-    // 현재는 비워두어도 괜찮습니다.
+function drawEffectIcons(ctx, x, y, size, unit) {
+    // 나중에 버프/디버프 아이콘을 그릴 때도 픽셀 완벽하게 그리세요
 }
 
 // 이 파일에서만 임시로 사용하는 getStat 함수

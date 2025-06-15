@@ -8217,9 +8217,20 @@ function processTurn() {
                 return;
             }
 
-            const panel = document.getElementById('item-target-panel');
-            const content = document.getElementById('item-target-content');
-            if (content) content.innerHTML = `<h3>${item.name} 대상 선택</h3>`;
+            let panel = document.getElementById('item-target-panel');
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.id = 'item-target-panel';
+                panel.style.display = 'none';
+                document.body.appendChild(panel);
+            }
+            let content = document.getElementById('item-target-content');
+            if (!content) {
+                content = document.createElement('div');
+                content.id = 'item-target-content';
+                panel.appendChild(content);
+            }
+            content.innerHTML = `<h3>${item.name} 대상 선택</h3>`;
             const choices = [];
 
             function getEquipInfo(target) {
@@ -8308,8 +8319,19 @@ function processTurn() {
 
         function showCorpsePanel(corpse) {
             SoundEngine.playSound('openPanel');
-            const panel = document.getElementById('corpse-panel');
-            const content = document.getElementById('corpse-content');
+            let panel = document.getElementById('corpse-panel');
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.id = 'corpse-panel';
+                panel.style.display = 'none';
+                document.body.appendChild(panel);
+            }
+            let content = document.getElementById('corpse-content');
+            if (!content) {
+                content = document.createElement('div');
+                content.id = 'corpse-content';
+                panel.appendChild(content);
+            }
             content.innerHTML = `<h3>${corpse.name} (${getMonsterRank(corpse)})</h3>`;
 
             const reviveBtn = document.createElement('button');
@@ -8348,7 +8370,8 @@ function processTurn() {
 
         function hideCorpsePanel() {
             SoundEngine.playSound('closePanel');
-            document.getElementById('corpse-panel').style.display = 'none';
+            const panel = document.getElementById('corpse-panel');
+            if (panel) panel.style.display = 'none';
             gameState.gameRunning = true;
             const content = document.getElementById('corpse-content');
             if (content) content.innerHTML = '';

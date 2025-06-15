@@ -8666,7 +8666,7 @@ hasLineOfSight, healAction, healTarget, hideItemTargetPanel, hideItemDetailPanel
 hideMercenaryDetails, hideMonsterDetails, hideShop, hireMercenary, killMonster, killMercenary,
 loadGame, meleeAttackAction, monsterAttack, performMonsterSkill, movePlayer, nextFloor,
 processMercenaryTurn, processProjectiles, processTurn, purifyTarget, 
-rangedAction, recallMercenaries, recruitHatchedSuperior, handleHatchedMonsterClick,
+  rangedAction, recallMercenaries, pickUpAction, recruitHatchedSuperior, handleHatchedMonsterClick,
 removeEggFromIncubator, reviveMercenary, reviveMonsterCorpse,
  rollDice, saveGame, sellItem, confirmAndSell, enhanceItem, disassembleItem, setMercenaryLevel, setMonsterLevel, setChampionLevel,
 showChampionDetails, showItemDetailPanel, showItemTargetPanel, showMercenaryDetails,
